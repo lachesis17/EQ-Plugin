@@ -29,8 +29,8 @@ void EQPluginAudioProcessorEditor::paint (juce::Graphics& g)
     g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
 
     g.setColour (juce::Colours::white);
-    g.setFont (15.0f);
-    g.drawFittedText ("Hello World!", getLocalBounds(), juce::Justification::centred, 1);
+    g.setFont (25.0f);
+    g.drawFittedText ("EQ in VST3!", getLocalBounds(), juce::Justification::centred, 1);
 }
 
 void EQPluginAudioProcessorEditor::resized()
