@@ -1,0 +1,4 @@
+cd /path/to/JUCE
+cmake . -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON
+cmake --build cmake-build --target Projucer
+cmake --build . --target AudioPluginExample_VST3
