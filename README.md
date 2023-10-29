@@ -5,7 +5,7 @@ Download / fork JUCE; put it in a pretty folder.
 
 Set up CMake for VS2019 (MingW64 is too slow) and open up the JUCE folder in VSCode.
 
-If you're using the github version (without Projucer.exe), make projucer from the JUCE dir with:
+If using github version (without Projucer.exe), make projucer from the JUCE dir with:
 
 ```cmake . -B build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON
 cmake --build build --target Projucer```
@@ -47,7 +47,7 @@ Change the obvious names and add in the boilerplate scripts from /Source/ with:
         Source/PluginEditor.h
         Source/PluginProcessor.h
         resources.rc
-        )```
+)```
 
 
 # Building
