@@ -1,6 +1,5 @@
 # EQ-Plugin
  JUCE C++ Equalizer Plugin (VST3 and Standalone.exe)
-
 Download / fork JUCE; put it in a pretty folder.
 
 Set up CMake for VS2019 (MingW64 is too slow) and open up the JUCE folder in VSCode.
@@ -47,8 +46,8 @@ Change the obvious names and add in the boilerplate scripts from /Source/ with:
         Source/PluginEditor.h
         Source/PluginProcessor.h
         resources.rc
-)```
-
+        )
+```
 
 # Building
 Now JUCE, Projucer and the blank template are up, open up the new blank plugin dir in VSCode. Let CMake make the magic. Then to build, either use the VSCode left toolbar shortcut or these run commands:
