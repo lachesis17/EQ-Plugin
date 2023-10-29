@@ -20,7 +20,7 @@ set(FORMATS "VST3" "Standalone" "AU")
 
 juce_add_plugin(EQ-Plugin
         VERSION 1.0.0
-        #COMPANY_NAME 
+        COMPANY_NAME lachesis
         IS_SYNTH FALSE
         NEEDS_MIDI_INPUT FALSE
         NEEDS_MIDI_OUTPUT FALSE
@@ -32,7 +32,10 @@ juce_add_plugin(EQ-Plugin
         VST3_CATEGORIES "Fx"
         #BUNDLE_ID ""
         PLUGIN_NAME "EQ Plugin"
-        PRODUCT_NAME "EQ Plugin")
+        PRODUCT_NAME "EQ Plugin"
+        ICON_BIG "icon.png"
+        ICON_SMALL "icon.png"
+        )
 
 target_compile_features(EQ-Plugin PRIVATE cxx_std_17)
 
@@ -45,6 +48,8 @@ target_sources(EQ-Plugin
         Source/PluginEditor.h
         Source/PluginProcessor.h
         resources.rc
+        Builds/VisualStudio2022/resources.rc
+        Builds/VisualStudio2022/icon.ico
         )
 
 #add_subdirectory(Sources)

@@ -10,11 +10,18 @@
 
 #include <JuceHeader.h>
 
+enum Slope {
+  Slope_12,
+  Slope_24,
+  Slope_36,
+  Slope_48
+};
+
 // Extract params from audio processor value tree state, save it in nice data type (struct)
 struct ChainSettings {
   float peakFreq {0}, peakGainInDecibels{0}, peakQuality{1.f};
   float lowCutFreq {0}, highCutFreq {0};
-  int lowCutSlope {0}, highCutSlope {0};
+  int lowCutSlope {Slope::Slope_12}, highCutSlope {Slope::Slope_12};
 };
 
 ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts);
@@ -77,7 +84,7 @@ private:
     // Four filters for the multiples of 12 (each filter type in IIR::Filter has 12db range) from combo box
     // In DSP, define a chain and pass it ProcessingContext values which goes through each member of chain auto
     // So put 4 filters into a chain to pass a single context and return all audio
-    // CutFilter
+    // CutFilter // Slope of cut filters = order
     using CutFilter = juce::dsp::ProcessorChain<Filter, Filter, Filter, Filter>;
 
     // Use Peak and Cut filters to apply parametric filter

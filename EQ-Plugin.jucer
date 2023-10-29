@@ -12,6 +12,7 @@
             file="Source/PluginEditor.cpp"/>
       <FILE id="P4zbCL" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h"/>
     </GROUP>
+    <FILE id="RoSu5F" name="icon.png" compile="0" resource="1" file="icon.png"/>
   </MAINGROUP>
   <MODULES>
     <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
@@ -52,7 +53,7 @@
         <MODULEPATH id="juce_dsp" path="../../JUCE/modules"/>
       </MODULEPATHS>
     </VS2019>
-    <VS2022 targetFolder="Builds/VisualStudio2022">
+    <VS2022 targetFolder="Builds/VisualStudio2022" smallIcon="RoSu5F" bigIcon="RoSu5F">
       <CONFIGURATIONS>
         <CONFIGURATION isDebug="1" name="Debug" targetName="EQ-Plugin"/>
         <CONFIGURATION isDebug="0" name="Release" targetName="EQ-Plugin"/>
