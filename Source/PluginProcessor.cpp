@@ -110,6 +110,21 @@ void EQPluginAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
 
     leftChain.prepare(spec);
     rightChain.prepare(spec);
+
+    // Now chain is prepared and we have the parameters from settings, make coefficients with static helper function in IIR::Coefficients
+    // For the gain need to convert the decibel (db) value to gain using helper function juce::Decibels::decibelsToGain(db)
+    auto chainSettings = getChainSettings(apvts);
+
+    // coefficent object = reference counted wrapper around array, allocated on the heap (oh noes)
+    auto peakCoefficients = juce::dsp::IIR::Coefficients<float>::makePeakFilter(sampleRate, chainSettings.peakFreq, chainSettings.peakQuality, juce::Decibels::decibelsToGain(chainSettings.peakGainInDecibels));
+
+    // Access a link in the chain, which needs an index - use the enum defined in header file:
+    // Dereference it from the heap (stack is better for thread usage in audio as everything is in a thread so things can
+    // execute in time before the big bad buffer catches you, so heap=bad and havinghearing=nice)
+    // Cool losing virginity with pointers to derefence from heap
+    *leftChain.get<ChainPositions::Peak>().coefficients = *peakCoefficients;
+    *rightChain.get<ChainPositions::Peak>().coefficients = *peakCoefficients;
+    // Now peak filter is set up and will make changes to audio but sliders are not doing anything until values are returned from widget listeners in ProcessBlock()
 }
 
 void EQPluginAudioProcessor::releaseResources()
@@ -158,6 +173,13 @@ void EQPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juc
     // this code if your algorithm always overwrites all the output channels.
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
+
+    // To make the GUI widgets affect the audio we need to update the parameters BEFORE processing audio through them
+    auto chainSettings = getChainSettings(apvts);
+    auto peakCoefficients = juce::dsp::IIR::Coefficients<float>::makePeakFilter(getSampleRate(), chainSettings.peakFreq, chainSettings.peakQuality, juce::Decibels::decibelsToGain(chainSettings.peakGainInDecibels));
+
+    *leftChain.get<ChainPositions::Peak>().coefficients = *peakCoefficients;
+    *rightChain.get<ChainPositions::Peak>().coefficients = *peakCoefficients;
 
     // Chain needs a ProcessingContext to be passed to run audio through links in chain
     // ProccessingContent requires an AudioBlock (chunk of audio, controlled by buffer)
@@ -217,6 +239,25 @@ void EQPluginAudioProcessor::setStateInformation (const void* data, int sizeInBy
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
 
+}
+
+ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts) {
+    ChainSettings settings;
+
+    // Can get parameter with listener this way but it returns a normalised value (which we define below)
+    // Functions creating coefficients need real values to process, not the normalised ones, so can't use this (but handy)
+    // apvts.getParameter("LowCut Freq")->getValue();
+
+    // Returns value based on the ranges set when we defined the params below
+    settings.lowCutFreq = apvts.getRawParameterValue("LowCut Freq")->load();
+    settings.highCutFreq = apvts.getRawParameterValue("HighCut Freq")->load();
+    settings.peakFreq = apvts.getRawParameterValue("Peak Freq")->load();
+    settings.peakGainInDecibels = apvts.getRawParameterValue("Peak Gain")->load();
+    settings.peakQuality = apvts.getRawParameterValue("Peak Quality")->load();
+    settings.lowCutSlope = apvts.getRawParameterValue("LowCut Slope")->load();
+    settings.highCutSlope = apvts.getRawParameterValue("HighCut Slope")->load();
+
+    return settings;
 }
 
 juce::AudioProcessorValueTreeState::ParameterLayout EQPluginAudioProcessor::createParameterLayout() 
