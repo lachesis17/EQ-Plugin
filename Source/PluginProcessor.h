@@ -60,6 +60,23 @@ public:
     juce::AudioProcessorValueTreeState apvts{*this, nullptr, "Parameters", createParameterLayout()};
 
 private:
+
+    // Create filter type aliases to use for setting two mono chains to process in stereo
+    // Peak Filter
+    using Filter = juce::dsp::IIR::Filter<float>;
+
+    // Four filters for the multiples of 12 (each filter type in IIR::Filter has 12db range) from combo box
+    // In DSP, define a chain and pass it ProcessingContext values which goes through each member of chain auto
+    // So put 4 filters into a chain to pass a single context and return all audio
+    // CutFilter
+    using CutFilter = juce::dsp::ProcessorChain<Filter, Filter, Filter, Filter>;
+
+    // Use Peak and Cut filters to apply parametric filter
+    using MonoChain = juce::dsp::ProcessorChain<CutFilter, Filter, CutFilter>;
+
+    // For both channels
+    MonoChain leftChain, rightChain;
+
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EQPluginAudioProcessor)
 };

@@ -98,6 +98,18 @@ void EQPluginAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
 {
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
+
+    // Pass this ProcessSpec object to the chains which passes it down each link in the chain
+    juce::dsp::ProcessSpec spec;
+
+    spec.maximumBlockSize = samplesPerBlock;
+
+    spec.numChannels = 1;
+
+    spec.sampleRate = sampleRate;
+
+    leftChain.prepare(spec);
+    rightChain.prepare(spec);
 }
 
 void EQPluginAudioProcessor::releaseResources()
@@ -147,18 +159,37 @@ void EQPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juc
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
 
-    // This is the place where you'd normally do the guts of your plugin's
-    // audio processing...
-    // Make sure to reset the state if your inner loop is processing
-    // the samples and the outer loop is handling the channels.
-    // Alternatively, you can process the samples with the channels
-    // interleaved by keeping the same state.
-    for (int channel = 0; channel < totalNumInputChannels; ++channel)
-    {
-        auto* channelData = buffer.getWritePointer (channel);
+    // Chain needs a ProcessingContext to be passed to run audio through links in chain
+    // ProccessingContent requires an AudioBlock (chunk of audio, controlled by buffer)
+    juce::dsp::AudioBlock<float> block(buffer);
 
-        // ..do something to the data...
-    }
+    // Buffer can have any num of channels, so pass declare the two we have using HelperFunction
+    auto leftBlock = block.getSingleChannelBlock(0);
+    auto rightBlock = block.getSingleChannelBlock(1);
+
+    // Blocks split by channel, create ProcessingContext from each block
+    juce::dsp::ProcessContextReplacing<float> leftContext(leftBlock);
+    juce::dsp::ProcessContextReplacing<float> rightContext(rightBlock);
+
+    // Process the context
+    leftChain.process(leftContext);
+    rightChain.process(rightContext);
+
+    // Commenting out the default below
+    // After this, need to go to JUCE dir, open up the AudioPlugIn host with Projucer, make a build then build it with CMake to run it.
+
+    // // This is the place where you'd normally do the guts of your plugin's
+    // // audio processing...
+    // // Make sure to reset the state if your inner loop is processing
+    // // the samples and the outer loop is handling the channels.
+    // // Alternatively, you can process the samples with the channels
+    // // interleaved by keeping the same state.
+    // for (int channel = 0; channel < totalNumInputChannels; ++channel)
+    // {
+    //     auto* channelData = buffer.getWritePointer (channel);
+
+    //     // ..do something to the data...
+    // }
 }
 
 //==============================================================================

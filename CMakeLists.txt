@@ -3,6 +3,8 @@ project(JUCE_EQ_Plugin VERSION 1.0.0)
 
 #add_subdirectory(Ext/JUCE)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
+
 include(FetchContent)
 set(FETCH_CONTENT_QUIET OFF)
 FetchContent_Declare(
@@ -14,7 +16,7 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(JUCE)
 
-set(FORMATS "VST3" "Standalone")
+set(FORMATS "VST3" "Standalone" "AU")
 
 juce_add_plugin(EQ-Plugin
         VERSION 1.0.0
@@ -56,6 +58,8 @@ target_link_libraries(EQ-Plugin
         PRIVATE
             # AudioPluginData           # If we'd created a binary data target, we'd link to it here
             juce::juce_audio_utils
+            juce::juce_core
+            juce::juce_dsp
         PUBLIC
             juce::juce_recommended_config_flags
             juce::juce_recommended_lto_flags
