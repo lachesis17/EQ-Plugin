@@ -20,7 +20,7 @@ EQPluginAudioProcessor::EQPluginAudioProcessor()
                       #endif
                        .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
                      #endif
-                       )
+                       ), apvts (*this, nullptr, "Parameters", createParameters())
 #endif
 {
 }
@@ -249,8 +249,8 @@ bool EQPluginAudioProcessor::hasEditor() const
 
 juce::AudioProcessorEditor* EQPluginAudioProcessor::createEditor()
 {
-    // return new EQPluginAudioProcessorEditor (*this);
-    return new juce::GenericAudioProcessorEditor(*this);
+    return new EQPluginAudioProcessorEditor (*this);
+    // return new juce::GenericAudioProcessorEditor(*this);
 }
 
 //==============================================================================
@@ -303,21 +303,52 @@ void EQPluginAudioProcessor::updateCoefficients(Coefficients &old, const Coeffic
 
 }
 
-juce::AudioProcessorValueTreeState::ParameterLayout EQPluginAudioProcessor::createParameterLayout() 
+//static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
+// {
+//     // Make a new layout and then add the widgets to it
+//     juce::AudioProcessorValueTreeState::ParameterLayout layout;
+
+//     // Sliders with args: id, name, range(min, max, interval increment, skew), default value // High Cut == Low Pass
+//     layout.add(std::make_unique<juce::AudioParameterFloat>("LowCut Freq", "LowCut Freq", juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 0.25f), 20.f));
+
+//     layout.add(std::make_unique<juce::AudioParameterFloat>("HighCut Freq", "HighCut Freq", juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 0.25f), 20000.f));
+
+//     layout.add(std::make_unique<juce::AudioParameterFloat>("Peak Freq", "Peak Freq", juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 0.25f), 750.f));
+
+//     layout.add(std::make_unique<juce::AudioParameterFloat>("Peak Gain", "Peak Gain", juce::NormalisableRange<float>(-24.f, 24.f, 0.5f, 1.f), 0.0f));
+
+//     layout.add(std::make_unique<juce::AudioParameterFloat>("Peak Quality", "Peak Quality", juce::NormalisableRange<float>(0.1f, 10.f, 0.05f, 1.f), 1.f));
+
+//     // Making a fancy string arrow to populate options on combo box instead of explicity naming them
+//     juce::StringArray stringArray;
+//     for(int i = 0; i < 4; i++) {
+//         juce::String str;
+//         // Order for pass filters { order = i + 1 * 2 }
+//         str << (12 + i * 12);
+//         str << " db/Oct";
+//         stringArray.add(str);
+//     }
+
+//     layout.add(std::make_unique<juce::AudioParameterChoice>("LowCut Slope", "LowCut Slope", stringArray, 0));
+//     layout.add(std::make_unique<juce::AudioParameterChoice>("HighCut Slope", "HighCut Slope", stringArray, 0));
+
+
+//     return layout;
+// }
+
+juce::AudioProcessorValueTreeState::ParameterLayout EQPluginAudioProcessor::createParameters()
 {
-    // Make a new layout and then add the widgets to it
-    juce::AudioProcessorValueTreeState::ParameterLayout layout;
+    std::vector<std::unique_ptr<juce::RangedAudioParameter>> params;
+    
+    params.push_back (std::make_unique<juce::AudioParameterFloat>("LowCut Freq", "LowCut Freq", juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 0.25f), 20.f));
 
-    // Sliders with args: id, name, range(min, max, interval increment, skew), default value // High Cut == Low Pass
-    layout.add(std::make_unique<juce::AudioParameterFloat>("LowCut Freq", "LowCut Freq", juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 0.25f), 20.f));
+    params.push_back(std::make_unique<juce::AudioParameterFloat>("HighCut Freq", "HighCut Freq", juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 0.25f), 20000.f));
 
-    layout.add(std::make_unique<juce::AudioParameterFloat>("HighCut Freq", "HighCut Freq", juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 0.25f), 20000.f));
+    params.push_back(std::make_unique<juce::AudioParameterFloat>("Peak Freq", "Peak Freq", juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 0.25f), 750.f));
 
-    layout.add(std::make_unique<juce::AudioParameterFloat>("Peak Freq", "Peak Freq", juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 0.25f), 750.f));
+    params.push_back(std::make_unique<juce::AudioParameterFloat>("Peak Gain", "Peak Gain", juce::NormalisableRange<float>(-24.f, 24.f, 0.5f, 1.f), 0.0f));
 
-    layout.add(std::make_unique<juce::AudioParameterFloat>("Peak Gain", "Peak Gain", juce::NormalisableRange<float>(-24.f, 24.f, 0.5f, 1.f), 0.0f));
-
-    layout.add(std::make_unique<juce::AudioParameterFloat>("Peak Quality", "Peak Quality", juce::NormalisableRange<float>(0.1f, 10.f, 0.05f, 1.f), 1.f));
+    params.push_back(std::make_unique<juce::AudioParameterFloat>("Peak Quality", "Peak Quality", juce::NormalisableRange<float>(0.1f, 10.f, 0.05f, 1.f), 1.f));
 
     // Making a fancy string arrow to populate options on combo box instead of explicity naming them
     juce::StringArray stringArray;
@@ -329,11 +360,11 @@ juce::AudioProcessorValueTreeState::ParameterLayout EQPluginAudioProcessor::crea
         stringArray.add(str);
     }
 
-    layout.add(std::make_unique<juce::AudioParameterChoice>("LowCut Slope", "LowCut Slope", stringArray, 0));
-    layout.add(std::make_unique<juce::AudioParameterChoice>("HighCut Slope", "HighCut Slope", stringArray, 0));
+    params.push_back(std::make_unique<juce::AudioParameterChoice>("LowCut Slope", "LowCut Slope", stringArray, 0));
 
+    params.push_back(std::make_unique<juce::AudioParameterChoice>("HighCut Slope", "HighCut Slope", stringArray, 0));
 
-    return layout;
+    return { params.begin(), params.end() };
 }
 
 //==============================================================================
