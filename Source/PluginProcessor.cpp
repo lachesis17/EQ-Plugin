@@ -127,16 +127,21 @@ void EQPluginAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
     //*rightChain.get<ChainPositions::Peak>().coefficients = *peakCoefficients;
     // Now peak filter is set up and will make changes to audio but sliders are not doing anything until values are returned from widget listeners in ProcessBlock()
 
-    //juce::dsp::FilterDesign<float>::designIIRHighpassHighOrderButterworthMethod(0, 0, 0);
-    auto cutCoefficients = juce::dsp::FilterDesign<float>::designIIRHighpassHighOrderButterworthMethod(chainSettings.lowCutFreq, sampleRate, 2 * (chainSettings.lowCutSlope + 1));
+    auto lowcutCoefficients = juce::dsp::FilterDesign<float>::designIIRHighpassHighOrderButterworthMethod(chainSettings.lowCutFreq, sampleRate, 2 * (chainSettings.lowCutSlope + 1));
 
-    auto& leftLowCut = leftChain.get<ChainPositions::lowCut>();
+    auto& leftLowCut = leftChain.get<ChainPositions::LowCut>();
+    updateCutFilter(leftLowCut, lowcutCoefficients, chainSettings.lowCutSlope);
 
-    updateCutFilter(leftLowCut, cutCoefficients, chainSettings.lowCutSlope);
+    auto& rightLowCut = rightChain.get<ChainPositions::LowCut>();
+    updateCutFilter(rightLowCut, lowcutCoefficients, chainSettings.lowCutSlope);
 
-    auto& rightLowCut = rightChain.get<ChainPositions::lowCut>();
+    auto highcutCoefficients = juce::dsp::FilterDesign<float>::designIIRHighpassHighOrderButterworthMethod(chainSettings.highCutFreq, sampleRate, 2 * (chainSettings.highCutSlope + 1));
 
-    updateCutFilter(rightLowCut, cutCoefficients, chainSettings.lowCutSlope);
+    auto& leftHighCut = leftChain.get<ChainPositions::HighCut>();
+    updateCutFilter(leftHighCut, highcutCoefficients, chainSettings.highCutSlope);
+
+    auto& rightHighCut = rightChain.get<ChainPositions::HighCut>();
+    updateCutFilter(rightHighCut, highcutCoefficients, chainSettings.highCutSlope);
 
 }
 
@@ -197,15 +202,21 @@ void EQPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juc
     // *leftChain.get<ChainPositions::Peak>().coefficients = *peakCoefficients;
     // *rightChain.get<ChainPositions::Peak>().coefficients = *peakCoefficients;
 
-    auto cutCoefficients = juce::dsp::FilterDesign<float>::designIIRHighpassHighOrderButterworthMethod(chainSettings.lowCutFreq, getSampleRate(), 2 * (chainSettings.lowCutSlope + 1));
+    auto lowcutCoefficients = juce::dsp::FilterDesign<float>::designIIRHighpassHighOrderButterworthMethod(chainSettings.lowCutFreq, getSampleRate(), 2 * (chainSettings.lowCutSlope + 1));
 
-    auto& leftLowCut = leftChain.get<ChainPositions::lowCut>();
+    auto& leftLowCut = leftChain.get<ChainPositions::LowCut>();
+    updateCutFilter(leftLowCut, lowcutCoefficients, chainSettings.lowCutSlope);
 
-    updateCutFilter(leftLowCut, cutCoefficients, chainSettings.lowCutSlope);
+    auto& rightLowCut = rightChain.get<ChainPositions::LowCut>();
+    updateCutFilter(rightLowCut, lowcutCoefficients, chainSettings.lowCutSlope);
 
-    auto& rightLowCut = rightChain.get<ChainPositions::lowCut>();
+    auto highcutCoefficients = juce::dsp::FilterDesign<float>::designIIRHighpassHighOrderButterworthMethod(chainSettings.highCutFreq, getSampleRate(), 2 * (chainSettings.highCutSlope + 1));
 
-    updateCutFilter(rightLowCut, cutCoefficients, chainSettings.lowCutSlope);
+    auto& leftHighCut = leftChain.get<ChainPositions::HighCut>();
+    updateCutFilter(leftHighCut, highcutCoefficients, chainSettings.highCutSlope);
+
+    auto& rightHighCut = rightChain.get<ChainPositions::HighCut>();
+    updateCutFilter(rightHighCut, highcutCoefficients, chainSettings.highCutSlope);
 
 
     // Chain needs a ProcessingContext to be passed to run audio through links in chain
@@ -303,7 +314,7 @@ void EQPluginAudioProcessor::updateCoefficients(Coefficients &old, const Coeffic
 
 }
 
-//static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
+// juce::AudioProcessorValueTreeState::ParameterLayout EQPluginAudioProcessor::createParameterLayout() 
 // {
 //     // Make a new layout and then add the widgets to it
 //     juce::AudioProcessorValueTreeState::ParameterLayout layout;

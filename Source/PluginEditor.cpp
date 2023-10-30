@@ -81,7 +81,7 @@ EQPluginAudioProcessorEditor::EQPluginAudioProcessorEditor (EQPluginAudioProcess
     addAndMakeVisible (highcutCombo);
     addAndMakeVisible (highcutComboLabel);
     highcutCombo.addItemList(stringArray, 1);
-    highcutComboLabel.setText ("Low Slope", juce::dontSendNotification);
+    highcutComboLabel.setText ("High Slope", juce::dontSendNotification);
     highcutComboLabel.attachToComponent (&highcutCombo, true);
     highcutComboAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment>(audioProcessor.apvts, "HighCut Slope", highcutCombo);
 

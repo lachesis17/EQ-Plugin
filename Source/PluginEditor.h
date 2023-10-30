@@ -29,6 +29,7 @@ private:
     // access the processor object that created it.
 
     // attachment for widget needs to go before widget declaration so the attachment is destroyed before the widget
+
     juce::Slider lowcutSlider;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> lowcutSliderAttachment;
     juce::Label lowcutLabel;
