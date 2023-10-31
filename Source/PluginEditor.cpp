@@ -16,13 +16,14 @@ EQPluginAudioProcessorEditor::EQPluginAudioProcessorEditor (EQPluginAudioProcess
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
 
+    
     lowcutSlider.setSliderStyle (juce::Slider::SliderStyle::LinearHorizontal);
     lowcutSlider.setTextBoxStyle (juce::Slider::TextBoxRight, true, 100, 50);
     lowcutSlider.setTextValueSuffix (" Hz");
     addAndMakeVisible (lowcutSlider);
     addAndMakeVisible (lowcutLabel);
     lowcutLabel.setFont(juce::Font{"Segoe UI", 18.f, 0});
-    lowcutLabel.setText ("Low Cut", juce::dontSendNotification);
+    lowcutLabel.setText ("High Pass", juce::dontSendNotification);
     lowcutLabel.attachToComponent (&lowcutSlider, true);
     lowcutSliderAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "LowCut Freq", lowcutSlider);     // allocate memory with make_unique
 
@@ -32,7 +33,7 @@ EQPluginAudioProcessorEditor::EQPluginAudioProcessorEditor (EQPluginAudioProcess
     addAndMakeVisible (highcutSlider);
     addAndMakeVisible (highcutLabel);
     highcutLabel.setFont(juce::Font{"Segoe UI", 18.f, 0});
-    highcutLabel.setText ("High Cut", juce::dontSendNotification);
+    highcutLabel.setText ("Low Pass", juce::dontSendNotification);
     highcutLabel.attachToComponent (&highcutSlider, true);
     highcutSliderAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "HighCut Freq", highcutSlider);
 
@@ -104,9 +105,9 @@ void EQPluginAudioProcessorEditor::paint (juce::Graphics& g)
                                        Colour(0, 0, 0), 0.875*(float) getWidth(), 0.875*(float) getHeight(), true));
     g.fillAll();
 
-
     // g.setColour (juce::Colours::white);
-    // g.setFont (25.0f);
+    // g.setColour (Colour(44, 0, 107)); 
+    // g.setFont (100.0f);
     // g.drawFittedText ("EQ in VST3!", getLocalBounds(), juce::Justification::centred, 1);
 }
 
