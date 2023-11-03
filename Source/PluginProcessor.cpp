@@ -294,6 +294,9 @@ ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts) {
     settings.peakQuality = apvts.getRawParameterValue("Peak Quality")->load();
     settings.lowCutSlope = static_cast<Slope>(apvts.getRawParameterValue("LowCut Slope")->load()); // Gets error because slope value was defined as int... which we changed to enum with Slope::Slope_12
     settings.highCutSlope = static_cast<Slope>(apvts.getRawParameterValue("HighCut Slope")->load()); // static_cast<type>(); looks awesome
+    // settings.lowCutSlope = static_cast<Slope>(static_cast<int>(round(apvts.getRawParameterValue("LowCut Slope")->load()))); // For some reason the float to enum fails on other system...
+    // settings.highCutSlope = static_cast<Slope>(static_cast<int>(round(apvts.getRawParameterValue("HighCut Slope")->load())));
+
 
     return settings;
 }

@@ -48,8 +48,6 @@ target_sources(EQ-Plugin
         Source/PluginEditor.h
         Source/PluginProcessor.h
         resources.rc
-        Builds/VisualStudio2022/resources.rc
-        Builds/VisualStudio2022/icon.ico
         )
 
 #add_subdirectory(Sources)
