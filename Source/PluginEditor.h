@@ -11,6 +11,14 @@
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
 
+struct CustomRotarySilder : juce::Slider
+{
+  CustomRotarySilder() : juce::Slider(juce::Slider::SliderStyle::RotaryHorizontalVerticalDrag, juce::Slider::TextEntryBoxPosition::TextBoxBelow)
+  {
+
+  }
+};
+
 //==============================================================================
 /**
 */
@@ -28,26 +36,52 @@ private:
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
 
+    EQPluginAudioProcessor& audioProcessor;
+
     // attachment for widget needs to go before widget declaration so the attachment is destroyed before the widget
 
-    juce::Slider lowcutSlider;
-    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> lowcutSliderAttachment;
+    CustomRotarySilder 
+    peakFreqSlider,
+    peakGainSlider,
+    peakQualitySlider,
+    highPassSlider,
+    lowPassSlider,
+    lowCutSlopeSlider,
+    highCutSlopeSlider;
+
+    using APVTS = juce::AudioProcessorValueTreeState;
+    using Attachment = APVTS::SliderAttachment;
+
+    Attachment
+    peakFreqSliderAttachment,
+    peakGainSliderAttachment,
+    peakQualitySliderAttachment,
+    highPassSliderAttachment,
+    lowPassSliderAttachment,
+    lowCutSlopeSliderAttachment,
+    highCutSlopeSliderAttachment;
+
+    std::vector<juce::Component*> getComps();
+
+    // My layout
+    // juce::Slider lowcutSlider;
+    // std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> lowcutSliderAttachment;
     juce::Label lowcutLabel;
 
-    juce::Slider highcutSlider;
-    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> highcutSliderAttachment;
+    // juce::Slider highcutSlider;
+    // std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> highcutSliderAttachment;
     juce::Label highcutLabel;
 
-    juce::Slider peakFreqSlider;
-    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> peakFreqSliderAttachment;
+    // juce::Slider peakFreqSlider;
+    // std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> peakFreqSliderAttachment;
     juce::Label peakFreqLabel;
 
-    juce::Slider peakGainSlider;
-    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> peakGainSliderAttachment;
+    // juce::Slider peakGainSlider;
+    // std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> peakGainSliderAttachment;
     juce::Label peakGainLabel;
 
-    juce::Slider peakQualitySlider;
-    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> peakQualitySliderAttachment;
+    // juce::Slider peakQualitySlider;
+    // std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> peakQualitySliderAttachment;
     juce::Label peakQualityLabel;
 
     juce::ComboBox lowcutCombo;
@@ -58,7 +92,6 @@ private:
     std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment> highcutComboAttachment;
     juce::Label highcutComboLabel;
 
-    EQPluginAudioProcessor& audioProcessor;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EQPluginAudioProcessorEditor)
 };
