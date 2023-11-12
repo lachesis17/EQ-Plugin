@@ -9,9 +9,131 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
+ResponseCurveComponent::ResponseCurveComponent(EQPluginAudioProcessor& p) : audioProcessor(p)
+{
+    const auto& params = audioProcessor.getParameters();
+    for (auto param: params)
+    {
+        param->addListener(this);
+    }
+
+    startTimerHz(120);
+}
+
+ResponseCurveComponent::~ResponseCurveComponent()
+{
+    const auto& params = audioProcessor.getParameters();
+    for (auto param: params)
+    {
+        param->removeListener(this);
+    }
+}
+
+void ResponseCurveComponent::parameterValueChanged(int parameterIndex, float newValue)
+{
+    parametersChanged.set(true);
+}
+
+void ResponseCurveComponent::timerCallback()
+{
+    if( parametersChanged.compareAndSetBool(false, true))
+    {
+        // DBG( "params changed");
+        // update monochain
+        auto chainSettings = getChainSettings(audioProcessor.apvts);
+        auto peakCoefficients = makePeakFilter(chainSettings, audioProcessor.getSampleRate());
+        updateCoefficients(monoChain.get<ChainPositions::Peak>().coefficients, peakCoefficients);
+
+        auto lowCutCoefficients = makeLowCutFilter(chainSettings, audioProcessor.getSampleRate());
+        auto highCutCoefficients = makeHighCutFilter(chainSettings, audioProcessor.getSampleRate());
+
+        updateCutFilter(monoChain.get<ChainPositions::LowCut>(), lowCutCoefficients, chainSettings.lowCutSlope);
+        updateCutFilter(monoChain.get<ChainPositions::HighCut>(), highCutCoefficients, chainSettings.highCutSlope);
+        
+        // signal repaint
+        repaint();
+    }
+}
+
+void ResponseCurveComponent::paint (juce::Graphics& g)
+{
+    using namespace juce;
+    g.fillAll (juce::Colours::black);
+
+    auto responseArea = getLocalBounds();
+    auto w = responseArea.getWidth();
+
+    auto& lowcut = monoChain.get<ChainPositions::LowCut>();
+    auto& peak = monoChain.get<ChainPositions::Peak>();
+    auto& highcut = monoChain.get<ChainPositions::HighCut>();
+
+    auto sampleRate = audioProcessor.getSampleRate();
+
+    std::vector<double> mags;
+
+    mags.resize(w);
+    
+    // setting the magnitude of frequency per pixel of the gui's bounds
+    for (int i = 0; i < w; ++i)
+    {
+        // gain not db
+        double mag = 1.f;
+        // get magnitude of pixel mapped from 'pixel' space to 'freq' space, map normalized pixel num to freq in hearing range
+        auto freq = mapToLog10(double(i) / double(w), 20.0, 20000.0);
+
+        if (! monoChain.isBypassed<ChainPositions::Peak>() )
+            mag *= peak.coefficients->getMagnitudeForFrequency(freq, sampleRate);
+
+        if (! lowcut.isBypassed<0>() )
+            mag *= lowcut.get<0>().coefficients->getMagnitudeForFrequency(freq, sampleRate);
+        if (! lowcut.isBypassed<1>() )
+            mag *= lowcut.get<1>().coefficients->getMagnitudeForFrequency(freq, sampleRate);
+        if (! lowcut.isBypassed<2>() )
+            mag *= lowcut.get<2>().coefficients->getMagnitudeForFrequency(freq, sampleRate);
+        if (! lowcut.isBypassed<3>() )
+            mag *= lowcut.get<3>().coefficients->getMagnitudeForFrequency(freq, sampleRate);
+
+        if (! highcut.isBypassed<0>() )
+            mag *= highcut.get<0>().coefficients->getMagnitudeForFrequency(freq, sampleRate);
+        if (! highcut.isBypassed<1>() )
+            mag *= highcut.get<1>().coefficients->getMagnitudeForFrequency(freq, sampleRate);
+        if (! highcut.isBypassed<2>() )
+            mag *= highcut.get<2>().coefficients->getMagnitudeForFrequency(freq, sampleRate);
+        if (! highcut.isBypassed<3>() )
+            mag *= highcut.get<3>().coefficients->getMagnitudeForFrequency(freq, sampleRate);
+
+        mags[i] = Decibels::gainToDecibels(mag);
+    }
+
+    // convert vector of mags into a path
+
+    Path responseCurve;
+
+    const double outputMin = responseArea.getBottom();
+    const double outputMax = responseArea.getY();
+    auto map = [outputMin, outputMax](double input)
+    {
+        return jmap(input, -24.0, 24.0, outputMin, outputMax);
+    };
+
+    responseCurve.startNewSubPath(responseArea.getX(), map(mags.front()));
+
+    for (size_t i = 1; i < mags.size(); ++i)
+    {
+        responseCurve.lineTo(responseArea.getX() + i, map(mags[i]) );
+    };
+
+    g.setColour(Colours::orange);
+    g.drawRoundedRectangle(responseArea.toFloat(), 4.f, 1.f);
+
+    g.setColour(Colours::white);
+    g.strokePath(responseCurve, PathStrokeType(2.f));
+}
+
 //==============================================================================
 EQPluginAudioProcessorEditor::EQPluginAudioProcessorEditor (EQPluginAudioProcessor& p)
     : AudioProcessorEditor (&p), audioProcessor (p),
+    responseCurveComponent(audioProcessor),
     peakFreqSliderAttachment(audioProcessor.apvts, "Peak Freq", peakFreqSlider), 
     peakGainSliderAttachment(audioProcessor.apvts, "Peak Gain", peakGainSlider), 
     peakQualitySliderAttachment(audioProcessor.apvts, "Peak Quality", peakQualitySlider), 
@@ -110,12 +232,6 @@ EQPluginAudioProcessorEditor::EQPluginAudioProcessorEditor (EQPluginAudioProcess
         addAndMakeVisible(comp);
     }
 
-    const auto& params = audioProcessor.getParameters();
-    for (auto param: params)
-    {
-        param->addListener(this);
-    }
-
     juce::StringArray stringArray;
     for(int i = 0; i < 4; i++) {
         juce::String str;
@@ -124,8 +240,6 @@ EQPluginAudioProcessorEditor::EQPluginAudioProcessorEditor (EQPluginAudioProcess
         str << " db/Oct";
         stringArray.add(str);
     }
-
-    startTimerHz(120);
     
     // addAndMakeVisible (lowcutCombo);
     // addAndMakeVisible (lowcutComboLabel);
@@ -146,11 +260,7 @@ EQPluginAudioProcessorEditor::EQPluginAudioProcessorEditor (EQPluginAudioProcess
 
 EQPluginAudioProcessorEditor::~EQPluginAudioProcessorEditor()
 {
-    const auto& params = audioProcessor.getParameters();
-    for (auto param: params)
-    {
-        param->removeListener(this);
-    }
+
 }
 
 //==============================================================================
@@ -169,76 +279,6 @@ void EQPluginAudioProcessorEditor::paint (juce::Graphics& g)
     g.setGradientFill(ColourGradient (Colour(23, 0, 62), 0.125*(float) getWidth(), 0.125*(float) getHeight(),
                                        Colour(0, 0, 0), 0.875*(float) getWidth(), 0.875*(float) getHeight(), true));
     g.fillAll();
-
-    auto bounds = getLocalBounds();
-    auto responseArea = bounds.removeFromTop(bounds.getHeight() * 0.33);
-    auto w = responseArea.getWidth();
-
-    auto& lowcut = monoChain.get<ChainPositions::LowCut>();
-    auto& peak = monoChain.get<ChainPositions::Peak>();
-    auto& highcut = monoChain.get<ChainPositions::HighCut>();
-
-    auto sampleRate = audioProcessor.getSampleRate();
-
-    std::vector<double> mags;
-
-    mags.resize(w);
-    
-    // setting the magnitude of frequency per pixel of the gui's bounds
-    for (int i = 0; i < w; ++i)
-    {
-        // gain not db
-        double mag = 1.f;
-        // get magnitude of pixel mapped from 'pixel' space to 'freq' space, map normalized pixel num to freq in hearing range
-        auto freq = mapToLog10(double(i) / double(w), 20.0, 20000.0);
-
-        if (! monoChain.isBypassed<ChainPositions::Peak>() )
-            mag *= peak.coefficients->getMagnitudeForFrequency(freq, sampleRate);
-
-        if (! lowcut.isBypassed<0>() )
-            mag *= lowcut.get<3>().coefficients->getMagnitudeForFrequency(freq, sampleRate);
-        if (! lowcut.isBypassed<1>() )
-            mag *= lowcut.get<3>().coefficients->getMagnitudeForFrequency(freq, sampleRate);
-        if (! lowcut.isBypassed<2>() )
-            mag *= lowcut.get<3>().coefficients->getMagnitudeForFrequency(freq, sampleRate);
-        if (! lowcut.isBypassed<3>() )
-            mag *= lowcut.get<3>().coefficients->getMagnitudeForFrequency(freq, sampleRate);
-
-        if (! highcut.isBypassed<0>() )
-            mag *= highcut.get<0>().coefficients->getMagnitudeForFrequency(freq, sampleRate);
-        if (! highcut.isBypassed<1>() )
-            mag *= highcut.get<1>().coefficients->getMagnitudeForFrequency(freq, sampleRate);
-        if (! highcut.isBypassed<2>() )
-            mag *= highcut.get<2>().coefficients->getMagnitudeForFrequency(freq, sampleRate);
-        if (! highcut.isBypassed<3>() )
-            mag *= highcut.get<3>().coefficients->getMagnitudeForFrequency(freq, sampleRate);
-
-        mags[i] = Decibels::gainToDecibels(mag);
-    }
-
-    // convert vector of mags into a path
-
-    Path responseCurve;
-
-    const double outputMin = responseArea.getBottom();
-    const double outputMax = responseArea.getY();
-    auto map = [outputMin, outputMax](double input)
-    {
-        return jmap(input, -24.0, 24.0, outputMin, outputMax);
-    };
-
-    responseCurve.startNewSubPath(responseArea.getX(), map(mags.front()));
-
-    for (size_t i = 1; i < mags.size(); ++i)
-    {
-        responseCurve.lineTo(responseArea.getX() + i, map(mags[i]) );
-    };
-
-    g.setColour(Colours::orange);
-    g.drawRoundedRectangle(responseArea.toFloat(), 4.f, 1.f);
-
-    g.setColour(Colours::white);
-    g.strokePath(responseCurve, PathStrokeType(2.f));
 }
 
 void EQPluginAudioProcessorEditor::resized()
@@ -248,6 +288,8 @@ void EQPluginAudioProcessorEditor::resized()
 
     auto bounds = getLocalBounds();
     auto responseArea = bounds.removeFromTop(bounds.getHeight() * 0.33);
+
+    responseCurveComponent.setBounds(responseArea);
 
     auto lowCutArea = bounds.removeFromLeft(bounds.getWidth() * 0.33);
     auto highCutArea = bounds.removeFromRight(bounds.getWidth() * 0.5);
@@ -273,27 +315,6 @@ void EQPluginAudioProcessorEditor::resized()
 
 }
 
-void EQPluginAudioProcessorEditor::parameterValueChanged(int parameterIndex, float newValue)
-{
-    parametersChanged.set(true);
-
-}
-
-void EQPluginAudioProcessorEditor::timerCallback()
-{
-    if( parametersChanged.compareAndSetBool(false, true))
-    {
-        DBG( "params changed");
-        // update monochain
-        auto chainSettings = getChainSettings(audioProcessor.apvts);
-        auto peakCoefficients = makePeakFilter(chainSettings, audioProcessor.getSampleRate());
-        updateCoefficients(monoChain.get<ChainPositions::Peak>().coefficients, peakCoefficients);
-
-        // signal repaint
-        repaint();
-    }
-}
-
 std::vector<juce::Component*> EQPluginAudioProcessorEditor::getComps()
 {
     return
@@ -304,6 +325,7 @@ std::vector<juce::Component*> EQPluginAudioProcessorEditor::getComps()
         &highPassSlider,
         &lowPassSlider,
         &lowCutSlopeSlider,
-        &highCutSlopeSlider
+        &highCutSlopeSlider,
+        &responseCurveComponent
     };
 }

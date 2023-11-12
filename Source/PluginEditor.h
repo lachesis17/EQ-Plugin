@@ -19,12 +19,32 @@ struct CustomRotarySilder : juce::Slider
   }
 };
 
+struct ResponseCurveComponent: juce::Component,
+juce::AudioProcessorParameter::Listener,
+juce::Timer
+{
+
+  ResponseCurveComponent(EQPluginAudioProcessor&);
+  ~ResponseCurveComponent();
+
+  // callbacks from Listener and Timer definitions
+  void parameterValueChanged (int parameterIndex, float newValue) override;
+
+  void parameterGestureChanged (int parameterIndex, bool gestureIsStarting) override { }
+
+  void timerCallback() override;
+
+  void paint(juce::Graphics& g) override;
+private:
+    EQPluginAudioProcessor& audioProcessor;
+    juce::Atomic<bool> parametersChanged { false };
+    MonoChain monoChain;
+};
+
 //==============================================================================
 /**
 */
-class EQPluginAudioProcessorEditor  : public juce::AudioProcessorEditor,
-juce::AudioProcessorParameter::Listener, 
-juce::Timer
+class EQPluginAudioProcessorEditor  : public juce::AudioProcessorEditor
 {
 public:
     EQPluginAudioProcessorEditor (EQPluginAudioProcessor&);
@@ -34,20 +54,11 @@ public:
     void paint (juce::Graphics&) override;
     void resized() override;
 
-    // from Listener definition
-    void parameterValueChanged (int parameterIndex, float newValue) override;
-    void parameterGestureChanged (int parameterIndex, bool gestureIsStarting) override { };
-    
-    // from Timer definiton
-    void timerCallback() override;
-
 private:
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
 
     EQPluginAudioProcessor& audioProcessor;
-
-    juce::Atomic<bool> parametersChanged { false };
 
     // attachment for widget needs to go before widget declaration so the attachment is destroyed before the widget
 
@@ -59,6 +70,8 @@ private:
     lowPassSlider,
     lowCutSlopeSlider,
     highCutSlopeSlider;
+
+    ResponseCurveComponent responseCurveComponent;
 
     using APVTS = juce::AudioProcessorValueTreeState;
     using Attachment = APVTS::SliderAttachment;
@@ -102,8 +115,6 @@ private:
     juce::ComboBox highcutCombo;
     std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment> highcutComboAttachment;
     juce::Label highcutComboLabel;
-
-    MonoChain monoChain;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EQPluginAudioProcessorEditor)
 };
