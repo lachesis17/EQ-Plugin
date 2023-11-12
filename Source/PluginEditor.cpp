@@ -110,6 +110,12 @@ EQPluginAudioProcessorEditor::EQPluginAudioProcessorEditor (EQPluginAudioProcess
         addAndMakeVisible(comp);
     }
 
+    const auto& params = audioProcessor.getParameters();
+    for (auto param: params)
+    {
+        param->addListener(this);
+    }
+
     juce::StringArray stringArray;
     for(int i = 0; i < 4; i++) {
         juce::String str;
@@ -118,6 +124,8 @@ EQPluginAudioProcessorEditor::EQPluginAudioProcessorEditor (EQPluginAudioProcess
         str << " db/Oct";
         stringArray.add(str);
     }
+
+    startTimerHz(120);
     
     // addAndMakeVisible (lowcutCombo);
     // addAndMakeVisible (lowcutComboLabel);
@@ -138,6 +146,11 @@ EQPluginAudioProcessorEditor::EQPluginAudioProcessorEditor (EQPluginAudioProcess
 
 EQPluginAudioProcessorEditor::~EQPluginAudioProcessorEditor()
 {
+    const auto& params = audioProcessor.getParameters();
+    for (auto param: params)
+    {
+        param->removeListener(this);
+    }
 }
 
 //==============================================================================
@@ -270,8 +283,14 @@ void EQPluginAudioProcessorEditor::timerCallback()
 {
     if( parametersChanged.compareAndSetBool(false, true))
     {
-        // update monochain to signal repaint
-        
+        DBG( "params changed");
+        // update monochain
+        auto chainSettings = getChainSettings(audioProcessor.apvts);
+        auto peakCoefficients = makePeakFilter(chainSettings, audioProcessor.getSampleRate());
+        updateCoefficients(monoChain.get<ChainPositions::Peak>().coefficients, peakCoefficients);
+
+        // signal repaint
+        repaint();
     }
 }
 
