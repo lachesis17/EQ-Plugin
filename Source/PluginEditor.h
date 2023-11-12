@@ -22,7 +22,9 @@ struct CustomRotarySilder : juce::Slider
 //==============================================================================
 /**
 */
-class EQPluginAudioProcessorEditor  : public juce::AudioProcessorEditor
+class EQPluginAudioProcessorEditor  : public juce::AudioProcessorEditor,
+juce::AudioProcessorParameter::Listener, 
+juce::Timer
 {
 public:
     EQPluginAudioProcessorEditor (EQPluginAudioProcessor&);
@@ -32,11 +34,20 @@ public:
     void paint (juce::Graphics&) override;
     void resized() override;
 
+    // from Listener definition
+    void parameterValueChanged (int parameterIndex, float newValue) override;
+    void parameterGestureChanged (int parameterIndex, bool gestureIsStarting) override { };
+    
+    // from Timer definiton
+    void timerCallback() override;
+
 private:
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
 
     EQPluginAudioProcessor& audioProcessor;
+
+    juce::Atomic<bool> parametersChanged { false };
 
     // attachment for widget needs to go before widget declaration so the attachment is destroyed before the widget
 

@@ -260,6 +260,21 @@ void EQPluginAudioProcessorEditor::resized()
 
 }
 
+void EQPluginAudioProcessorEditor::parameterValueChanged(int parameterIndex, float newValue)
+{
+    parametersChanged.set(true);
+
+}
+
+void EQPluginAudioProcessorEditor::timerCallback()
+{
+    if( parametersChanged.compareAndSetBool(false, true))
+    {
+        // update monochain to signal repaint
+        
+    }
+}
+
 std::vector<juce::Component*> EQPluginAudioProcessorEditor::getComps()
 {
     return
