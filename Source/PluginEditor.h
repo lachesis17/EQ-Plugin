@@ -11,12 +11,41 @@
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
 
-struct CustomRotarySilder : juce::Slider
+struct RotaryLookAndFeel : juce::LookAndFeel_V4
 {
-  CustomRotarySilder() : juce::Slider(juce::Slider::SliderStyle::RotaryHorizontalVerticalDrag, juce::Slider::TextEntryBoxPosition::TextBoxBelow)
-  {
+  void drawRotarySlider (juce::Graphics&,
+                        int x, int y, int width, int height,
+                        float sliderPosProportional,
+                        float rotaryStartAngle,
+                        float rotaryEndAngle,
+                        juce::Slider&) override { }
+};
 
+struct RotarySliderWithLabels : juce::Slider
+{
+  RotarySliderWithLabels(juce::RangedAudioParameter& rap, const juce::String& unitSuffix) : 
+  juce::Slider(juce::Slider::SliderStyle::RotaryHorizontalVerticalDrag, juce::Slider::TextEntryBoxPosition::NoTextBox),
+  param(&rap),
+  suffix(unitSuffix)
+  {
+    setLookAndFeel(&lnf);
   }
+
+  // setLookAndFeel, so unset it with destructor
+  ~RotarySliderWithLabels()
+  {
+    setLookAndFeel(nullptr);
+  }
+
+  void paint(juce::Graphics& g) override { }
+  juce::Rectangle<int> getSliderBounds() const;
+  int getTextHeight() const { return 14; }
+  juce::String getDisplayString() const;
+private:
+  RotaryLookAndFeel lnf; // Calling this "LookAndFeel" throws ambiguous symbol error as could be juce::LookAndFeel
+
+  juce::RangedAudioParameter* param;
+  juce::String suffix;
 };
 
 struct ResponseCurveComponent: juce::Component,
@@ -62,7 +91,7 @@ private:
 
     // attachment for widget needs to go before widget declaration so the attachment is destroyed before the widget
 
-    CustomRotarySilder 
+    RotarySliderWithLabels 
     peakFreqSlider,
     peakGainSlider,
     peakQualitySlider,
@@ -90,31 +119,33 @@ private:
     // My layout
     // juce::Slider lowcutSlider;
     // std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> lowcutSliderAttachment;
-    juce::Label lowcutLabel;
+    //juce::Label lowcutLabel;
 
     // juce::Slider highcutSlider;
     // std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> highcutSliderAttachment;
-    juce::Label highcutLabel;
+    //juce::Label highcutLabel;
 
     // juce::Slider peakFreqSlider;
     // std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> peakFreqSliderAttachment;
-    juce::Label peakFreqLabel;
+    //juce::Label peakFreqLabel;
 
     // juce::Slider peakGainSlider;
     // std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> peakGainSliderAttachment;
-    juce::Label peakGainLabel;
+    //juce::Label peakGainLabel;
 
     // juce::Slider peakQualitySlider;
     // std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> peakQualitySliderAttachment;
-    juce::Label peakQualityLabel;
+    //juce::Label peakQualityLabel;
 
     juce::ComboBox lowcutCombo;
     std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment> lowcutComboAttachment;
-    juce::Label lowcutComboLabel;
+    //juce::Label lowcutComboLabel;
 
     juce::ComboBox highcutCombo;
     std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment> highcutComboAttachment;
-    juce::Label highcutComboLabel;
+    //juce::Label highcutComboLabel;
+
+    RotaryLookAndFeel lnf;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EQPluginAudioProcessorEditor)
 };

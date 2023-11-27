@@ -123,7 +123,7 @@ void ResponseCurveComponent::paint (juce::Graphics& g)
         responseCurve.lineTo(responseArea.getX() + i, map(mags[i]) );
     };
 
-    g.setColour(Colours::orange);
+    g.setColour(Colours::purple);
     g.drawRoundedRectangle(responseArea.toFloat(), 4.f, 1.f);
 
     g.setColour(Colours::white);
@@ -133,6 +133,14 @@ void ResponseCurveComponent::paint (juce::Graphics& g)
 //==============================================================================
 EQPluginAudioProcessorEditor::EQPluginAudioProcessorEditor (EQPluginAudioProcessor& p)
     : AudioProcessorEditor (&p), audioProcessor (p),
+    peakFreqSlider(*audioProcessor.apvts.getParameter("Peak Freq"), "Hz"),
+    peakGainSlider(*audioProcessor.apvts.getParameter("Peak Gain"), "dB"), 
+    peakQualitySlider(*audioProcessor.apvts.getParameter("Peak Quality"), ""), 
+    highPassSlider(*audioProcessor.apvts.getParameter("LowCut Freq"), "Hz"), 
+    lowPassSlider(*audioProcessor.apvts.getParameter("HighCut Freq"), "Hz"), 
+    lowCutSlopeSlider(*audioProcessor.apvts.getParameter("LowCut Slope"), "dB/Oct"), 
+    highCutSlopeSlider(*audioProcessor.apvts.getParameter("HighCut Slope"), "dB/Oct"),
+
     responseCurveComponent(audioProcessor),
     peakFreqSliderAttachment(audioProcessor.apvts, "Peak Freq", peakFreqSlider), 
     peakGainSliderAttachment(audioProcessor.apvts, "Peak Gain", peakGainSlider), 
@@ -144,38 +152,38 @@ EQPluginAudioProcessorEditor::EQPluginAudioProcessorEditor (EQPluginAudioProcess
 {
 
 
-    highPassSlider.setTextValueSuffix (" Hz");
-    lowPassSlider.setTextValueSuffix (" Hz");
+    // highPassSlider.setTextValueSuffix (" Hz");
+    // lowPassSlider.setTextValueSuffix (" Hz");
 
-    addAndMakeVisible(lowcutLabel);
-    lowcutLabel.setFont(juce::Font{"Segoe UI", 18.f, 0});
-    lowcutLabel.setText ("High Pass", juce::dontSendNotification);
-    lowcutLabel.attachToComponent (&highPassSlider, false);
+    // addAndMakeVisible(lowcutLabel);
+    // lowcutLabel.setFont(juce::Font{"Segoe UI", 18.f, 0});
+    // lowcutLabel.setText ("High Pass", juce::dontSendNotification);
+    // lowcutLabel.attachToComponent (&highPassSlider, false);
 
-    addAndMakeVisible(highcutLabel);
-    highcutLabel.setFont(juce::Font{"Segoe UI", 18.f, 0});
-    highcutLabel.setText ("Low Pass", juce::dontSendNotification);
-    highcutLabel.attachToComponent (&lowPassSlider, false);
+    // addAndMakeVisible(highcutLabel);
+    // highcutLabel.setFont(juce::Font{"Segoe UI", 18.f, 0});
+    // highcutLabel.setText ("Low Pass", juce::dontSendNotification);
+    // highcutLabel.attachToComponent (&lowPassSlider, false);
 
-    addAndMakeVisible (peakFreqLabel);
-    peakFreqLabel.setText ("Peak Freq", juce::dontSendNotification);
-    peakFreqLabel.attachToComponent (&peakFreqSlider, false);
+    // addAndMakeVisible (peakFreqLabel);
+    // peakFreqLabel.setText ("Peak Freq", juce::dontSendNotification);
+    // peakFreqLabel.attachToComponent (&peakFreqSlider, false);
 
-    addAndMakeVisible (peakGainLabel);
-    peakGainLabel.setText ("Peak Gain", juce::dontSendNotification);
-    peakGainLabel.attachToComponent (&peakGainSlider, false);
+    // addAndMakeVisible (peakGainLabel);
+    // peakGainLabel.setText ("Peak Gain", juce::dontSendNotification);
+    // peakGainLabel.attachToComponent (&peakGainSlider, false);
 
-    addAndMakeVisible (peakQualityLabel);
-    peakQualityLabel.setText ("Peak Quality", juce::dontSendNotification);
-    peakQualityLabel.attachToComponent (&peakQualitySlider, false);
+    // addAndMakeVisible (peakQualityLabel);
+    // peakQualityLabel.setText ("Peak Quality", juce::dontSendNotification);
+    // peakQualityLabel.attachToComponent (&peakQualitySlider, false);
 
-    addAndMakeVisible (lowcutComboLabel);
-    lowcutComboLabel.setText ("Low Slope", juce::dontSendNotification);
-    lowcutComboLabel.attachToComponent (&lowCutSlopeSlider, false);
+    // addAndMakeVisible (lowcutComboLabel);
+    // lowcutComboLabel.setText ("Low Slope", juce::dontSendNotification);
+    // lowcutComboLabel.attachToComponent (&lowCutSlopeSlider, false);
 
-    addAndMakeVisible (highcutComboLabel);
-    highcutComboLabel.setText ("High Slope", juce::dontSendNotification);
-    highcutComboLabel.attachToComponent (&highCutSlopeSlider, false);
+    // addAndMakeVisible (highcutComboLabel);
+    // highcutComboLabel.setText ("High Slope", juce::dontSendNotification);
+    // highcutComboLabel.attachToComponent (&highCutSlopeSlider, false);
 
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
