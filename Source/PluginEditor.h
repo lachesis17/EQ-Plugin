@@ -13,7 +13,7 @@
 
 struct RotaryLookAndFeel : juce::LookAndFeel_V4
 {
-  void drawRotarySlider (juce::Graphics&,
+  void drawRotarySlider (juce::Graphics&, // from juce::LookAndFeel_V4 class line 206
                         int x, int y, int width, int height,
                         float sliderPosProportional,
                         float rotaryStartAngle,
@@ -72,6 +72,7 @@ juce::Timer
   void timerCallback() override;
 
   void paint(juce::Graphics& g) override;
+  void resized() override;
 private:
     EQPluginAudioProcessor& audioProcessor;
     juce::Atomic<bool> parametersChanged { false };
@@ -79,6 +80,9 @@ private:
     MonoChain monoChain;
 
     void updateChain();
+
+    juce::Image background;
+
 };
 
 //==============================================================================

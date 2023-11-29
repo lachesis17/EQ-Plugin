@@ -217,6 +217,8 @@ void ResponseCurveComponent::paint (juce::Graphics& g)
     using namespace juce;
     g.fillAll (juce::Colours::black);
 
+    g.drawImage(background, getLocalBounds().toFloat());
+
     auto responseArea = getLocalBounds();
     auto w = responseArea.getWidth();
 
@@ -287,6 +289,42 @@ void ResponseCurveComponent::paint (juce::Graphics& g)
     g.strokePath(responseCurve, PathStrokeType(2.f));
 }
 
+void ResponseCurveComponent::resized()
+{
+    using namespace juce;
+    background = Image(Image::PixelFormat::RGB, getWidth(), getHeight(), true);
+
+    Graphics g(background);
+
+    Array<float> freqs
+    {
+        20, 30, 40, 50, 100,
+        200, 300, 400, 500, 1000,
+        2000, 3000, 4000, 5000, 10000,
+        20000,
+    };
+
+    g.setColour(Colours::grey);
+    for (auto f : freqs)
+    {
+        auto normX = mapFromLog10(f, 20.f, 20000.f);
+
+        g.drawVerticalLine(getWidth() * normX, 0.f, getHeight());
+    }
+
+    Array<float> gain
+    {
+        -24, -12, 0, 12, 24,
+    };
+
+    for (auto gDb : gain)
+    {
+        auto y = jmap(gDb, -24.f, 24.f, float(getHeight()), 0.f);
+        g.drawHorizontalLine(y, 0, getWidth());
+
+    }
+
+}
 //==============================================================================
 EQPluginAudioProcessorEditor::EQPluginAudioProcessorEditor (EQPluginAudioProcessor& p)
     : AudioProcessorEditor (&p), audioProcessor (p),
@@ -441,7 +479,7 @@ EQPluginAudioProcessorEditor::EQPluginAudioProcessorEditor (EQPluginAudioProcess
     // highcutComboLabel.attachToComponent (&highcutCombo, true);
     // highcutComboAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment>(audioProcessor.apvts, "HighCut Slope", highcutCombo);
 
-    setSize (750, 500);
+    setSize (500, 500);
 }
 
 EQPluginAudioProcessorEditor::~EQPluginAudioProcessorEditor()

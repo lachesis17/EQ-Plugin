@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="SOTyXG" name="EQ-Plugin" projectType="audioplug" useAppConfig="0"
-              addUsingNamespaceToJuceHeader="0" displaySplashScreen="1" jucerFormatVersion="1">
+              addUsingNamespaceToJuceHeader="0" displaySplashScreen="1" jucerFormatVersion="1"
+              includeBinaryInJuceHeader="1">
   <MAINGROUP id="GaMnhK" name="EQ-Plugin">
     <GROUP id="{1897D026-F8C4-B693-B0F8-E9804BB23693}" name="Source">
       <FILE id="NCn81d" name="PluginProcessor.cpp" compile="1" resource="0"
