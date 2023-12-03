@@ -116,6 +116,9 @@ void EQPluginAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
 
     updateFilters(); // just update the filters
 
+    leftChannelFifo.prepare(samplesPerBlock);
+    rightChannelFifo.prepare(samplesPerBlock);
+
 
     // auto chainSettings = getChainSettings(apvts);
 
@@ -240,6 +243,9 @@ void EQPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juc
     // Process the context
     leftChain.process(leftContext);
     rightChain.process(rightContext);
+
+    leftChannelFifo.update(buffer);
+    rightChannelFifo.update(buffer);
 
     // Commenting out the default below
     // After this, need to go to JUCE dir, open up the AudioPlugIn host with Projucer, make a build then build it with CMake to run it.
