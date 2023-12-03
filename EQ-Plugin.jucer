@@ -14,6 +14,8 @@
       <FILE id="P4zbCL" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h"/>
     </GROUP>
     <FILE id="RoSu5F" name="icon.png" compile="0" resource="1" file="icon.png"/>
+    <FILE id="hvBuYq" name="Roboto-Regular.ttf" compile="0" resource="1"
+          file="Roboto-Regular.ttf"/>
   </MAINGROUP>
   <MODULES>
     <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>

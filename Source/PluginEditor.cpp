@@ -28,8 +28,8 @@ float rotaryStartAngle, float rotaryEndAngle, juce::Slider & slider)
         Path p;
 
         Rectangle<float> r;
-        r.setLeft(center.getX() - 2);
-        r.setRight(center.getX() + 2);
+        r.setLeft(center.getX() - 2.5);
+        r.setRight(center.getX() + 2.5);
         r.setTop(bounds.getY());
         r.setBottom(center.getY() - rswl->getTextHeight() * 1.5);
 
@@ -46,13 +46,19 @@ float rotaryStartAngle, float rotaryEndAngle, juce::Slider & slider)
         auto text = rswl->getDisplayString();
         auto strWidth = g.getCurrentFont().getStringWidth(text);
         
-        r.setSize(strWidth + 4, rswl->getTextHeight() + 2);
+        r.setSize(strWidth + 12, rswl->getTextHeight() + 6);
         r.setCentre(center);
 
         g.setColour(Colours::black);
-        g.fillRect(r);
+        g.drawRoundedRectangle(r, 10,1);
+        g.fillRoundedRectangle(r, 10);
+        //g.fillRect(r);
 
         g.setColour(Colours::white);
+        // RotaryLookAndFeel::getDefaultLookAndFeel().setDefaultSansSerifTypeface(Typeface::createSystemTypefaceFor(BinaryData::SEGOEUI_TTF,
+        //                                           BinaryData::SEGOEUI_TTFSize));
+        //Font font(RotaryLookAndFeel::getLabelFont(), 25.f, Font::plain);
+        //Label::setFont();
         g.drawFittedText(text, r.toNearestInt(), Justification::centred, 1);
     }
 

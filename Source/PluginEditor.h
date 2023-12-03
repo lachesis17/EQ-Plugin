@@ -175,6 +175,12 @@ struct RotaryLookAndFeel : juce::LookAndFeel_V4
                         float rotaryStartAngle,
                         float rotaryEndAngle,
                         juce::Slider&) override;
+
+  // juce::Font m_tf = juce::Typeface::createSystemTypefaceFor(BinaryData::RobotoRegular_ttf, BinaryData::RobotoRegular_ttfSize);
+
+  // juce::Font getLabelFont(juce::Label& label) override { 
+  //   return m_tf.withHeight(label.getHeight() * 1.f);
+  // }
 };
 
 
