@@ -4,4 +4,5 @@
 # CMake setup readme
 [github.com/lachesis17/CPP-JUCE-Template](https://github.com/lachesis17/CPP-JUCE-Template#readme)
 
-https://github.com/lachesis17/EQ-Plugin/assets/78860436/e0a06339-2942-4c5b-be1a-4654f6d6e6dd
+# Demo
+https://github.com/lachesis17/EQ-Plugin/assets/78860436/af1a69f8-fd03-4247-85b5-f14b57170d3e
