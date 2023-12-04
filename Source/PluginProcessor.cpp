@@ -119,6 +119,10 @@ void EQPluginAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
     leftChannelFifo.prepare(samplesPerBlock);
     rightChannelFifo.prepare(samplesPerBlock);
 
+    // osc.initialise([](float x) { return std::sin(x); }); // lambda? // sine wave noise
+    // spec.numChannels = getTotalNumOutputChannels();
+    // osc.prepare(spec);
+    // osc.setFrequency(50); // making noise with sine waves!
 
     // auto chainSettings = getChainSettings(apvts);
 
@@ -231,6 +235,10 @@ void EQPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juc
     // Chain needs a ProcessingContext to be passed to run audio through links in chain
     // ProccessingContent requires an AudioBlock (chunk of audio, controlled by buffer)
     juce::dsp::AudioBlock<float> block(buffer);
+
+    // buffer.clear(); // sine wave noise
+    // juce::dsp::ProcessContextReplacing<float> stereoContext(block); // sine wave noise
+    // osc.process(stereoContext); // sine wave noise
 
     // Buffer can have any num of channels, so pass declare the two we have using HelperFunction
     auto leftBlock = block.getSingleChannelBlock(0);

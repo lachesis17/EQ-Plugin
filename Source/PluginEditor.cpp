@@ -17,6 +17,8 @@ float rotaryStartAngle, float rotaryEndAngle, juce::Slider & slider)
     auto bounds = Rectangle<float>(x, y, width, height);
 
     g.setColour(Colour(63u, 11u, 74u));
+    g.setGradientFill(ColourGradient (Colour(Colours::darkorange), 0.175*(float) width, 0.175*(float) height,
+                                       Colour(63, 11, 74), 0.75*(float) width, 0.75*(float) height, true));
     g.fillEllipse(bounds);
 
     g.setColour(Colour(250u, 250u, 250u));
@@ -46,19 +48,22 @@ float rotaryStartAngle, float rotaryEndAngle, juce::Slider & slider)
         auto text = rswl->getDisplayString();
         auto strWidth = g.getCurrentFont().getStringWidth(text);
         
-        r.setSize(strWidth + 12, rswl->getTextHeight() + 6);
+        r.setSize(strWidth + 22, rswl->getTextHeight() + 10);
         r.setCentre(center);
 
         g.setColour(Colours::black);
-        g.drawRoundedRectangle(r, 10,1);
-        g.fillRoundedRectangle(r, 10);
+        g.drawRoundedRectangle(r, 12,1);
+        g.fillRoundedRectangle(r, 12);
         //g.fillRect(r);
 
         g.setColour(Colours::white);
-        // RotaryLookAndFeel::getDefaultLookAndFeel().setDefaultSansSerifTypeface(Typeface::createSystemTypefaceFor(BinaryData::SEGOEUI_TTF,
-        //                                           BinaryData::SEGOEUI_TTFSize));
-        //Font font(RotaryLookAndFeel::getLabelFont(), 25.f, Font::plain);
-        //Label::setFont();
+        //g.setFont(Font("Tahoma", 17, 0)); // a few different ways to change font, but instead change for all labels in the lookandfeel class in header
+        // juce::Font roboto_font = juce::Typeface::createSystemTypefaceFor(BinaryData::RobotoRegular_ttf, BinaryData::RobotoRegular_ttfSize);
+        // g.setFont(Font(roboto_font.getTypefaceName(), 15, 1));
+        // const juce::Typeface::Ptr typeface = juce::Typeface::createSystemTypefaceFor(BinaryData::RobotoRegular_ttf,BinaryData::RobotoRegular_ttfSize);
+        // g.setFont(juce::Font(typeface).withHeight(17.0f));
+        const juce::Typeface::Ptr typeface = juce::Typeface::createSystemTypefaceFor(BinaryData::Orbitron_ttf, BinaryData::Orbitron_ttfSize);
+        g.setFont(juce::Font(typeface).withHeight(15.5f)); // slider labels
         g.drawFittedText(text, r.toNearestInt(), Justification::centred, 1);
     }
 
@@ -87,9 +92,10 @@ void RotarySliderWithLabels::paint(juce::Graphics &g)
     auto center = sliderBounds.toFloat().getCentre();
     auto radius = sliderBounds.getWidth() * 0.5f;
 
-    g.setColour(Colour(0u, 172u, 1u));
     //g.setColour(Colour(172u, 79u, 15u));
-    g.setFont(getTextHeight());
+    //g.setFont(getTextHeight());
+    g.setColour(Colour(0u, 172u, 1u));
+    g.setFont(12); // green labels
     
 
     auto numChoices = labels.size();
@@ -168,18 +174,15 @@ juce::String RotarySliderWithLabels::getDisplayString() const
 //==============================================================================
 ResponseCurveComponent::ResponseCurveComponent(EQPluginAudioProcessor& p) : 
 audioProcessor(p),
-leftChannelFifo(&audioProcessor.leftChannelFifo)
+//leftChannelFifo(&audioProcessor.leftChannelFifo)
+leftPathProducer(audioProcessor.leftChannelFifo),
+rightPathProducer(audioProcessor.rightChannelFifo)
 {
     const auto& params = audioProcessor.getParameters();
     for (auto param: params)
     {
         param->addListener(this);
     }
-
-    // 48000 (sample rate) / 2048 (bins) = 23hz (in spectrum)
-    // when bins are larger (4096, 8192), more cpu
-    leftChannelFFTDataGenerator.changeOrder(FFTOrder::order2048);
-    monoBuffer.setSize(1, leftChannelFFTDataGenerator.getFFTSize());
 
     updateChain();
 
@@ -200,10 +203,9 @@ void ResponseCurveComponent::parameterValueChanged(int parameterIndex, float new
     parametersChanged.set(true);
 }
 
-void ResponseCurveComponent::timerCallback()
+void PathProducer::process(juce::Rectangle<float> fftBounds, double sampleRate)
 {
-    using namespace juce;
-    AudioBuffer<float> tempIncomingBuffer; // create temp buffer to hold buffer if exists
+    juce::AudioBuffer<float> tempIncomingBuffer; // create temp buffer to hold buffer if exists
     
     //while there are buffers to pull from SCF, prepapre to send to FFT generator
     while (leftChannelFifo->getNumCompleteBuffersAvailable() > 0)
@@ -226,11 +228,9 @@ void ResponseCurveComponent::timerCallback()
     }
 
     //while FTT buffers have been prepared, generate a path
-
-    const auto fftBounds = getAnalysisArea().toFloat();
     const auto fftSize = leftChannelFFTDataGenerator.getFFTSize();
     // 48000 (sample rate) / 2048 (bins) = 23hz (bin width)
-    const auto binWidth = audioProcessor.getSampleRate() / (double)fftSize;
+    const auto binWidth = sampleRate / (double)fftSize; // audioProcessor.getSampleRate()
 
     while (leftChannelFFTDataGenerator.getNumAvailableFFTDataBlocks() > 0)
     {
@@ -247,6 +247,15 @@ void ResponseCurveComponent::timerCallback()
     {
         pathProducer.getPath(leftChannelFFTPath);
     }
+}
+
+void ResponseCurveComponent::timerCallback()
+{
+    auto fftBounds = getAnalysisArea().toFloat();
+    auto sampleRate = audioProcessor.getSampleRate();
+
+    leftPathProducer.process(fftBounds, sampleRate);
+    rightPathProducer.process(fftBounds, sampleRate);
 
     if( parametersChanged.compareAndSetBool(false, true))
     {
@@ -344,8 +353,17 @@ void ResponseCurveComponent::paint (juce::Graphics& g)
         responseCurve.lineTo(responseArea.getX() + i, map(mags[i]) );
     };
 
+    auto leftChannelFFTPath = leftPathProducer.getPath();
+    leftChannelFFTPath.applyTransform(AffineTransform().translation(responseArea.getX(), responseArea.getY()));
+
     g.setColour(Colours::blueviolet);
     g.strokePath(leftChannelFFTPath, PathStrokeType(1.5f));
+
+    auto rightChannelFFTPath = rightPathProducer.getPath();
+    rightChannelFFTPath.applyTransform(AffineTransform().translation(responseArea.getX(), responseArea.getY()));
+
+    g.setColour(Colours::darkorange);
+    g.strokePath(rightChannelFFTPath, PathStrokeType(1.5f));
 
     g.setColour(Colours::purple);
     g.drawRoundedRectangle(getRenderArea().toFloat(), 4.f, 1.f);
@@ -360,6 +378,9 @@ void ResponseCurveComponent::resized()
     background = Image(Image::PixelFormat::RGB, getWidth(), getHeight(), true);
 
     Graphics g(background);
+
+    const juce::Typeface::Ptr typeface = juce::Typeface::createSystemTypefaceFor(BinaryData::Monomaniac_ttf, BinaryData::Monomaniac_ttfSize);
+    g.setFont(juce::Font(typeface).withHeight(11.0f));
 
     Array<float> freqs
     {
@@ -402,7 +423,7 @@ void ResponseCurveComponent::resized()
     }
 
     g.setColour(Colours::lightgrey);
-    const int fontHeight = 10;
+    const int fontHeight = 14; // grid labels
     g.setFont(fontHeight);
 
     for (int i = 0; i < freqs.size(); ++i)
@@ -467,7 +488,7 @@ juce::Rectangle<int> ResponseCurveComponent::getRenderArea()
 {
     auto bounds = getLocalBounds();
 
-    bounds.removeFromTop(12);
+    bounds.removeFromTop(16);
     bounds.removeFromBottom(2);
     bounds.removeFromLeft(20);
     bounds.removeFromRight(20);
@@ -670,7 +691,7 @@ void EQPluginAudioProcessorEditor::resized()
     // subcomponents in your editor..
 
     auto bounds = getLocalBounds();
-    float hRatio = 30.f / 100.f; //JUCE_LIVE_CONSTANT(33) / 100.f; // live values
+    float hRatio = 32.f / 100.f; //JUCE_LIVE_CONSTANT(33) / 100.f; // live values
     auto responseArea = bounds.removeFromTop(bounds.getHeight() * hRatio);
 
     responseCurveComponent.setBounds(responseArea);

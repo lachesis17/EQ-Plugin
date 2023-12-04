@@ -41,6 +41,11 @@ target_compile_features(EQ-Plugin PRIVATE cxx_std_17)
 
 juce_generate_juce_header(EQ-Plugin)
 
+juce_add_binary_data(BinaryData SOURCES
+        Orbitron.ttf
+        Monomaniac.ttf
+)
+
 target_sources(EQ-Plugin
     PRIVATE
         Source/PluginEditor.cpp
@@ -60,6 +65,7 @@ target_compile_definitions(EQ-Plugin PUBLIC
 target_link_libraries(EQ-Plugin
         PRIVATE
             # AudioPluginData           # If we'd created a binary data target, we'd link to it here
+            BinaryData
             juce::juce_audio_utils
             juce::juce_core
             juce::juce_dsp

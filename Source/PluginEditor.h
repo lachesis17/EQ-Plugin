@@ -178,9 +178,14 @@ struct RotaryLookAndFeel : juce::LookAndFeel_V4
 
   // juce::Font m_tf = juce::Typeface::createSystemTypefaceFor(BinaryData::RobotoRegular_ttf, BinaryData::RobotoRegular_ttfSize);
 
-  // juce::Font getLabelFont(juce::Label& label) override { 
-  //   return m_tf.withHeight(label.getHeight() * 1.f);
-  // }
+//   juce::Font getLabelFont(juce::Label& label) override { 
+//     return juce::Font(typeface).withHeight(label.getHeight() * 1.f);
+//   } // add the font to all Slider labels by overriding the getLabelFont method
+
+    //LookAndFeel::getDefaultLookAndFeel().setDefaultSansSerifTypeface(juce::Font(typeface));
+
+private:
+//   const juce::Typeface::Ptr typeface = juce::Typeface::createSystemTypefaceFor(BinaryData::RobotoMono_ttf, BinaryData::RobotoMono_ttfSize);
 };
 
 
@@ -219,6 +224,29 @@ private:
   juce::String suffix;
 };
 
+struct PathProducer
+{
+    PathProducer(SingleChannelSampleFifo<EQPluginAudioProcessor::BlockType>& scsf) : leftChannelFifo(&scsf)
+    {
+        leftChannelFFTDataGenerator.changeOrder(FFTOrder::order2048);
+        monoBuffer.setSize(1, leftChannelFFTDataGenerator.getFFTSize());
+    }
+
+    void process(juce::Rectangle<float> fftBounds, double sampleRate);
+    juce::Path getPath() { return leftChannelFFTPath; }
+
+private:
+    SingleChannelSampleFifo<EQPluginAudioProcessor::BlockType>* leftChannelFifo;
+    
+    juce::AudioBuffer<float> monoBuffer;
+    
+    FFTDataGenerator<std::vector<float>> leftChannelFFTDataGenerator;
+    
+    AnalyzerPathGenerator<juce::Path> pathProducer;
+    
+    juce::Path leftChannelFFTPath;
+};
+
 struct ResponseCurveComponent: juce::Component,
 juce::AudioProcessorParameter::Listener,
 juce::Timer
@@ -249,16 +277,7 @@ private:
     juce::Rectangle<int> getRenderArea();
     juce::Rectangle<int> getAnalysisArea();
 
-    SingleChannelSampleFifo<EQPluginAudioProcessor::BlockType> *leftChannelFifo;
-    SingleChannelSampleFifo<EQPluginAudioProcessor::BlockType> *rightChannelFifo;
-
-    juce::AudioBuffer<float> monoBuffer;
-
-    FFTDataGenerator<std::vector<float>> leftChannelFFTDataGenerator;
-
-    AnalyzerPathGenerator<juce::Path> pathProducer;
-
-    juce::Path leftChannelFFTPath;
+    PathProducer leftPathProducer, rightPathProducer;
 };
 
 //==============================================================================
