@@ -186,7 +186,7 @@ rightPathProducer(audioProcessor.rightChannelFifo)
 
     updateChain();
 
-    startTimerHz(60);
+    startTimerHz(120);
 }
 
 ResponseCurveComponent::~ResponseCurveComponent()
