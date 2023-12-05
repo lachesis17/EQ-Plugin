@@ -5,6 +5,4 @@
 [github.com/lachesis17/CPP-JUCE-Template](https://github.com/lachesis17/CPP-JUCE-Template#readme)
 
 # Demo
-
-
-https://github.com/lachesis17/EQ-Plugin/assets/78860436/adea74b6-1fac-4ae3-909c-5f68b5dba6e5
+https://github.com/lachesis17/EQ-Plugin/assets/78860436/8f508d78-4e02-40a2-b9c0-9b1efef740a2
