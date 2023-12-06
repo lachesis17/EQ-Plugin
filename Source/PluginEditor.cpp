@@ -83,7 +83,7 @@ void RotaryLookAndFeel::drawToggleButton(juce::Graphics &g,
     bounds.removeFromLeft(90);
     // g.setColour(Colours::red);
     // g.drawRect(bounds);
-    auto size = jmin(bounds.getWidth(), bounds.getHeight()) - 6; // jmin returns smaller of 2 vals, to make square a square in non-square bbox
+    auto size = jmin(bounds.getWidth(), bounds.getHeight()) * 0.5;//JUCE_LIVE_CONSTANT(0.5); // jmin returns smaller of 2 vals, to make square a square in non-square bbox // bypass size
     auto r = bounds.withSizeKeepingCentre(size, size).toFloat(); // returns a rectangle! very cool
 
     float ang = 30.f;
@@ -759,20 +759,25 @@ void EQPluginAudioProcessorEditor::resized()
 
     responseCurveComponent.setBounds(responseArea);
 
-    bounds.removeFromTop(15);
+    auto bypassArea = getLocalBounds();
+    bypassArea.removeFromTop(bypassArea.getHeight() * hRatio);
 
+    bounds.removeFromTop(bounds.getHeight() * 0.08);//JUCE_LIVE_CONSTANT(0.08)));
+
+    auto bypassAreaLow = bypassArea.removeFromLeft(bypassArea.getWidth() * 0.33);
+    auto bypassAreaHigh = bypassArea.removeFromRight(bypassArea.getWidth() * 0.5);
     auto lowCutArea = bounds.removeFromLeft(bounds.getWidth() * 0.33);
     auto highCutArea = bounds.removeFromRight(bounds.getWidth() * 0.5);
 
-    lowcutBypassButton.setBounds(lowCutArea.removeFromTop(25));
+    lowcutBypassButton.setBounds(bypassAreaLow.removeFromTop(bypassAreaLow.getHeight() * 0.08));//JUCE_LIVE_CONSTANT(0.08)));
     highPassSlider.setBounds(lowCutArea.removeFromTop(lowCutArea.getHeight() * 0.5));
     lowCutSlopeSlider.setBounds(lowCutArea);
 
-    highcutBypassButton.setBounds(highCutArea.removeFromTop(25));
+    highcutBypassButton.setBounds(bypassAreaHigh.removeFromTop(bypassAreaHigh.getHeight() * 0.08));//JUCE_LIVE_CONSTANT(0.08)));
     lowPassSlider.setBounds(highCutArea.removeFromTop(highCutArea.getHeight() * 0.5));
     highCutSlopeSlider.setBounds(highCutArea);
 
-    peakBypassButton.setBounds(bounds.removeFromTop(25));
+    peakBypassButton.setBounds(bypassArea.removeFromTop(bypassArea.getHeight() * 0.08));//JUCE_LIVE_CONSTANT(0.08)));
     peakFreqSlider.setBounds(bounds.removeFromTop(bounds.getHeight() * 0.33));
     peakGainSlider.setBounds(bounds.removeFromTop(bounds.getHeight() * 0.5));
     peakQualitySlider.setBounds(bounds);

@@ -65,27 +65,10 @@
           uiLastX_Normal="341" uiLastY_Normal="373" uiopen_Normal="1">
     <PLUGIN name="a-player" format="VST3" category="Fx" manufacturer="yourcompany"
             version="1.0.0" file="C:\Program Files\Common Files\VST3\a-player.vst3\Contents\x86_64-win\a-player.vst3"
-            uniqueId="f198d822" isInstrument="0" fileTime="18b7b39723c" infoUpdateTime="18c40141739"
+            uniqueId="f198d822" isInstrument="0" fileTime="18b7b39723c" infoUpdateTime="18c40aed64b"
             numInputs="2" numOutputs="2" isShell="0" hasARAExtension="0"
             uid="e952e66c"/>
     <STATE>278.VMjLgzP....O+fWarAhckI2bo8la8HRLt.iHfTlai8FYo41Y8HRUTYTK3HxO9.BOVMEUy.Ea0cVZtMEcgQWY9vSRC8Vav8lak4Fc9DiLz3BTIISX1UEaho2ZVkUdAAkKAwDUigWRWkEcQ0VTucmUY4BQtjTQLolShUELhsVRxHlXEoVX5gCagIFLTMVdqECVhUkZSQURUYkYlIESuMiTgYWSC4hKt3hKt3hKt3hKt3hRUACTEEzZh8VVWgkdUYTTmE0UX4BQP4hPqcjXm0jLh4BQP4xPt.0Qt3hKt3hKt3hKtQUUCUEQTg2ZrM1YQcUVDUjQicVP77RRC8Vav8lak4Fc9vyKVMEUy.Ea0cVZtMEcgQWY9..</STATE>
-    <LAYOUT>
-      <INPUTS>
-        <BUS index="0" layout="L R"/>
-      </INPUTS>
-      <OUTPUTS>
-        <BUS index="0" layout="L R"/>
-      </OUTPUTS>
-    </LAYOUT>
-  </FILTER>
-  <FILTER uid="7" x="0.5128617363344051" y="0.6245847176079734" useARA="0"
-          uiLastX_Normal="918" uiLastY_Normal="314" uiopen_Normal="0">
-    <PLUGIN name="EQ Plugin" format="VST3" category="Fx" manufacturer="lachesis"
-            version="1.0.0" file="C:\Program Files\Common Files\VST3\EQ Plugin.vst3\Contents\x86_64-win\EQ Plugin.vst3"
-            uniqueId="3aae121" isInstrument="0" fileTime="18c40128c61" infoUpdateTime="18c40141739"
-            numInputs="2" numOutputs="2" isShell="0" hasARAExtension="0"
-            uid="e95b59c2"/>
-    <STATE>879.VMjLgX1....O+fWarAhckI2bo8la8HRLt.iHfTlai8FYo41Y8HRUTYTK3HxO9.BOVMEUy.Ea0cVZtMEcgQWY9vSRC8Vav8lak4Fc9TyM03BTEwlXmAiUYoWUrIVdA4hKAImKTETRUAUSAAkKBolQY4BQlQTQDoVXmcmUjUSUrIlYToVXmkjQgsVTF4RLEYTXvTkQtDjZtDjKt3hKt3hKtX2JC4BTEoFUAACQtDDRPokZAAkKRQkKR81XFo0PUczXlgDUjYWQwHVdUYTVtf0UXIWUWkkKDAkPD4hKt3hKt3hKt3hKt3RUPIUQTMkKDYlKuEkQtDzLPEDRqESVt0DUioWPnEEdUYkXtf0UXIWUWkkKDAkPD4hKt3hKt3BRN0DTt3RUPIUQTMkKDYlKuEkQtDzMPEDRqESVt0DUioWP3Qkb3XjXqEjYic1cVM1ZAAkKIAkKt3hKt3hKt3hKt3hKTETRUAUSAAkKBolQY4BQPQTQ1oWXxzDUioWPnAEMAcEV40zUYoVPlM1Y2Y0XqEDTtjDTt3hKt3hKt3hKt3hKtPUPIUETMEDTtHjZFkkKDA0PEYmdgISSTMldAgVT3UkUh4BVWgkbUcUVtPDTBQjKt3hKt3hKt.0PP4hKUAkTEQ0TtPjYt7VTF4RPy.UPLgSLiMTUGMlYLUTX0EzUY4BVWgkbUcUVtPDTBQjKt3hKt3hKt3hKt3hKUAkTEQ0TtPjYt7VTF4RP2.UPPUkUXEWPnAEMAcEV40zUYoVPlM1Y2Y0XqEDTtjDTt3hKt3hKt3hKt3hKtPUPIUETMEDTtHjZFkkKDYmPE4RUYc1bFgjQIcUV2EjYic1cVM1ZAAkKIAkKt3hKt3hKtHGUtDjKTETRUAUSAAkKBolQY4BQ1ITQtTUVmMmQHcTQVoEcAY1XmcmUisVPP4RRP4hKt3hKt3hKt3hKt3BUAkTUP0TPP4hPpYTVtPjYCUjKUk0YyYDRQU0UXI2ZFMFMAY1XmcmUisVPP4RRP4hKt3hKt3hKtbyJt3hKt3hKt3hKt3hKtQUUCUEQTg2ZrM1YQcUVDUjQicVPP4RPHQEY1UTLhkWPP4RPL4hKi4hKt3hKt3hKtXlTU0DUQAURWoULEYzXqEEUXoWQFwyKIMzasA2atUlaz4COuX0TTMCTrU2Yo41TzEFck4C.</STATE>
     <LAYOUT>
       <INPUTS>
         <BUS index="0" layout="L R"/>
@@ -101,7 +84,24 @@
             version="1.0.0" file="Gain PlugIn" uniqueId="7987ff14" isInstrument="0"
             fileTime="0" infoUpdateTime="0" numInputs="2" numOutputs="2"
             isShell="0" hasARAExtension="0" uid="7987ff14"/>
-    <STATE>4.Jb8n8.</STATE>
+    <STATE>4.LyLS9.</STATE>
+    <LAYOUT>
+      <INPUTS>
+        <BUS index="0" layout="L R"/>
+      </INPUTS>
+      <OUTPUTS>
+        <BUS index="0" layout="L R"/>
+      </OUTPUTS>
+    </LAYOUT>
+  </FILTER>
+  <FILTER uid="9" x="0.5064308681672026" y="0.6378737541528239" useARA="0"
+          uiLastX_Normal="1113" uiLastY_Normal="320" uiopen_Normal="1">
+    <PLUGIN name="EQ Plugin" format="VST3" category="Fx" manufacturer="lachesis"
+            version="1.0.0" file="C:\Program Files\Common Files\VST3\EQ Plugin.vst3\Contents\x86_64-win\EQ Plugin.vst3"
+            uniqueId="fdadd51d" isInstrument="0" fileTime="18c40ad8d97" infoUpdateTime="18c40aed64c"
+            numInputs="2" numOutputs="2" isShell="0" hasARAExtension="0"
+            uid="e958a953"/>
+    <STATE>879.VMjLgX1....O+fWarAhckI2bo8la8HRLt.iHfTlai8FYo41Y8HRUTYTK3HxO9.BOVMEUy.Ea0cVZtMEcgQWY9vSRC8Vav8lak4Fc9TyM03BTEwlXmAiUYoWUrIVdA4hKAImKTETRUAUSAAkKBolQY4BQlQTQDoVXmcmUjUSUrIlYToVXmkjQgsVTF4RLEYTXvTkQtDjZtDjKt3hKt3hKtX2JC4BTEoFUAACQtDDRPokZAAkKRQkKR81XFo0PUczXlgDUjYWQwHVdUYTVtf0UXIWUWkkKDAkPD4hKt3hKt3hKt3hKt3RUPIUQTMkKDYlKuEkQtDzLPEDRqESVt0DUioWPnEEdUYkXtf0UXIWUWkkKDAkPD4hKt3hKt3BRN0DTt3RUPIUQTMkKDYlKuEkQtDzMPEDRqESVt0DUioWP3Qkb3XjXqEjYic1cVM1ZAAkKIAkKt3hKt3hKt3hKt3hKTETRUAUSAAkKBolQY4BQPQTQ1oWXxzDUioWPnAEMAcEV40zUYoVPlM1Y2Y0XqEDTtjDTt3hKt3hKt3hKt3hKtPUPIUETMEDTtHjZFkkKDA0PEYmdgISSTMldAgVT3UkUh4BVWgkbUcUVtPDTBQjKt3hKt3hKt.0PP4hKUAkTEQ0TtPjYt7VTF4RPy.UPLgSLiMTUGMlYLUTX0EzUY4BVWgkbUcUVtPDTBQjKt3hKt3hKt3hKt3hKUAkTEQ0TtPjYt7VTF4RP2.UPPUkUXEWPnAEMAcEV40zUYoVPlM1Y2Y0XqEDTtjDTt3hKt3hKt3hKt3hKtPUPIUETMEDTtHjZFkkKDYmPE4RUYc1bFgjQIcUV2EjYic1cVM1ZAAkKIAkKt3hKt3hKtHGUtDjKTETRUAUSAAkKBolQY4BQ1ITQtTUVmMmQHcTQVoEcAY1XmcmUisVPP4RRP4hKt3hKt3hKtnjKA4BUAkTUP0TPP4hPpYTVtPjYCUjKUk0YyYDRQU0UXI2ZFMFMAY1XmcmUisVPP4RRP4hKt3hKt3hKtbyJt3hKt3hKt3hKt3hKtQUUCUEQTg2ZrM1YQcUVDUjQicVPP4RPHQEY1UTLhkWPP4RPL4hKi4hKt3hKt3hKtXlTU0DUQAURWoULEYzXqEEUXoWQFwyKIMzasA2atUlaz4COuX0TTMCTrU2Yo41TzEFck4C.</STATE>
     <LAYOUT>
       <INPUTS>
         <BUS index="0" layout="L R"/>
@@ -113,8 +113,8 @@
   </FILTER>
   <CONNECTION srcFilter="6" srcChannel="0" dstFilter="8" dstChannel="0"/>
   <CONNECTION srcFilter="6" srcChannel="1" dstFilter="8" dstChannel="1"/>
-  <CONNECTION srcFilter="7" srcChannel="0" dstFilter="3" dstChannel="0"/>
-  <CONNECTION srcFilter="7" srcChannel="1" dstFilter="3" dstChannel="1"/>
-  <CONNECTION srcFilter="8" srcChannel="0" dstFilter="7" dstChannel="0"/>
-  <CONNECTION srcFilter="8" srcChannel="1" dstFilter="7" dstChannel="1"/>
+  <CONNECTION srcFilter="8" srcChannel="0" dstFilter="9" dstChannel="0"/>
+  <CONNECTION srcFilter="8" srcChannel="1" dstFilter="9" dstChannel="1"/>
+  <CONNECTION srcFilter="9" srcChannel="0" dstFilter="3" dstChannel="0"/>
+  <CONNECTION srcFilter="9" srcChannel="1" dstFilter="3" dstChannel="1"/>
 </FILTERGRAPH>
