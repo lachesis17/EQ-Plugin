@@ -145,7 +145,7 @@ struct AnalyzerPathGenerator //lol who needs classes with structs
             {
                 auto binFreq = binNum * binWidth;
                 auto normalizedBinX = juce::mapFromLog10(binFreq, 20.f, 20000.f);
-                int binX = std::floor(normalizedBinX * width);
+                float binX = std::floor(normalizedBinX * width);
                 p.lineTo(binX, y);
             }
         }
@@ -169,7 +169,7 @@ private:
 
 struct RotaryLookAndFeel : juce::LookAndFeel_V4
 {
-  void drawRotarySlider (juce::Graphics&, // from juce::LookAndFeel_V4 class line 206
+    void drawRotarySlider (juce::Graphics&, // from juce::LookAndFeel_V4 class line 206
                         int x, int y, int width, int height,
                         float sliderPosProportional,
                         float rotaryStartAngle,
@@ -183,6 +183,11 @@ struct RotaryLookAndFeel : juce::LookAndFeel_V4
 //   } // add the font to all Slider labels by overriding the getLabelFont method
 
     //LookAndFeel::getDefaultLookAndFeel().setDefaultSansSerifTypeface(juce::Font(typeface));
+
+    void drawToggleButton (juce::Graphics &g, // line 119
+                        juce::ToggleButton &toggleButton, 
+                        bool shouldDrawButtonAsHighlighted, 
+                        bool shouldDrawButtonAsDown) override;
 
 private:
 //   const juce::Typeface::Ptr typeface = juce::Typeface::createSystemTypefaceFor(BinaryData::RobotoMono_ttf, BinaryData::RobotoMono_ttfSize);

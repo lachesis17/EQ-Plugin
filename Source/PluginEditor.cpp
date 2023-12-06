@@ -66,8 +66,42 @@ float rotaryStartAngle, float rotaryEndAngle, juce::Slider & slider)
         g.setFont(juce::Font(typeface).withHeight(15.5f)); // slider labels
         g.drawFittedText(text, r.toNearestInt(), Justification::centred, 1);
     }
+}
 
+void RotaryLookAndFeel::drawToggleButton(juce::Graphics &g,
+                        juce::ToggleButton &toggleButton, 
+                        bool shouldDrawButtonAsHighlighted, 
+                        bool shouldDrawButtonAsDown)
+{
+    using namespace juce; // Projucer->Settings->Add "using namespace juce" to JuceHeader.h
 
+    Path powerButton;
+
+    auto bounds = toggleButton.getLocalBounds();
+    //bounds.removeFromBottom(10);
+    bounds.removeFromRight(90);
+    bounds.removeFromLeft(90);
+    // g.setColour(Colours::red);
+    // g.drawRect(bounds);
+    auto size = jmin(bounds.getWidth(), bounds.getHeight()) - 6; // jmin returns smaller of 2 vals, to make square a square in non-square bbox
+    auto r = bounds.withSizeKeepingCentre(size, size).toFloat(); // returns a rectangle! very cool
+
+    float ang = 30.f;
+
+    size -= 6;
+
+    powerButton.addCentredArc(r.getCentreX(), r.getCentreY(), size * 0.5, size * 0.5, 0.f, degreesToRadians(ang), degreesToRadians(360.f - ang), true);
+
+    powerButton.startNewSubPath(r.getCentreX(), r.getY());
+    powerButton.lineTo(r.getCentre());
+
+    PathStrokeType pst(2.f, PathStrokeType::JointStyle::curved); // need to use this class to customise the path strokes for the analyzer
+
+    auto color = toggleButton.getToggleState() ? Colours::dimgrey : Colour(0u, 172u, 1u); // need to start doing this one line if else
+
+    g.setColour(color);
+    g.strokePath(powerButton, pst);
+    g.drawEllipse(r, 2);
 }
 //==============================================================================
 void RotarySliderWithLabels::paint(juce::Graphics &g)
@@ -367,14 +401,18 @@ void ResponseCurveComponent::paint (juce::Graphics& g)
     auto leftChannelFFTPath = leftPathProducer.getPath();
     leftChannelFFTPath.applyTransform(AffineTransform().translation(responseArea.getX(), responseArea.getY() - 2.5));
 
+    // PathStrokeType pst(2.f, PathStrokeType::JointStyle::curved);
+    
     g.setColour(Colours::blueviolet);
     g.strokePath(leftChannelFFTPath, PathStrokeType(2.f));
+    // g.strokePath(leftChannelFFTPath, pst);
 
     auto rightChannelFFTPath = rightPathProducer.getPath();
     rightChannelFFTPath.applyTransform(AffineTransform().translation(responseArea.getX(), responseArea.getY() - 2.5));
 
     g.setColour(Colours::darkorange);
     g.strokePath(rightChannelFFTPath, PathStrokeType(2.f));
+    // g.strokePath(rightChannelFFTPath, pst);
     // g.fillPath(rightChannelFFTPath); // fills the spectrum line, but the Y is messed up from the response area
 
     g.setColour(Colours::purple);
@@ -677,13 +715,19 @@ EQPluginAudioProcessorEditor::EQPluginAudioProcessorEditor (EQPluginAudioProcess
     // highcutComboLabel.attachToComponent (&highcutCombo, true);
     // highcutComboAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment>(audioProcessor.apvts, "HighCut Slope", highcutCombo);
 
+    lowcutBypassButton.setLookAndFeel(&lnf);
+    peakBypassButton.setLookAndFeel(&lnf);
+    highcutBypassButton.setLookAndFeel(&lnf);
+
     setSize (650, 650);
     setResizable(true,true);
 }
 
 EQPluginAudioProcessorEditor::~EQPluginAudioProcessorEditor()
 {
-
+    lowcutBypassButton.setLookAndFeel(nullptr);
+    peakBypassButton.setLookAndFeel(nullptr);
+    highcutBypassButton.setLookAndFeel(nullptr);
 }
 
 //==============================================================================
