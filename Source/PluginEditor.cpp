@@ -186,7 +186,7 @@ rightPathProducer(audioProcessor.rightChannelFifo)
 
     updateChain();
 
-    startTimerHz(120);
+    startTimerHz(165); // refresh rate
 }
 
 ResponseCurveComponent::~ResponseCurveComponent()
@@ -354,16 +354,17 @@ void ResponseCurveComponent::paint (juce::Graphics& g)
     };
 
     auto leftChannelFFTPath = leftPathProducer.getPath();
-    leftChannelFFTPath.applyTransform(AffineTransform().translation(responseArea.getX(), responseArea.getY()));
+    leftChannelFFTPath.applyTransform(AffineTransform().translation(responseArea.getX(), responseArea.getY() - 2.5));
 
     g.setColour(Colours::blueviolet);
-    g.strokePath(leftChannelFFTPath, PathStrokeType(1.5f));
+    g.strokePath(leftChannelFFTPath, PathStrokeType(2.f));
 
     auto rightChannelFFTPath = rightPathProducer.getPath();
-    rightChannelFFTPath.applyTransform(AffineTransform().translation(responseArea.getX(), responseArea.getY()));
+    rightChannelFFTPath.applyTransform(AffineTransform().translation(responseArea.getX(), responseArea.getY() - 2.5));
 
     g.setColour(Colours::darkorange);
-    g.strokePath(rightChannelFFTPath, PathStrokeType(1.5f));
+    g.strokePath(rightChannelFFTPath, PathStrokeType(2.f));
+    // g.fillPath(rightChannelFFTPath); // fills the spectrum line, but the Y is messed up from the response area
 
     g.setColour(Colours::purple);
     g.drawRoundedRectangle(getRenderArea().toFloat(), 4.f, 1.f);

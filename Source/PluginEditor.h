@@ -228,7 +228,7 @@ struct PathProducer
 {
     PathProducer(SingleChannelSampleFifo<EQPluginAudioProcessor::BlockType>& scsf) : leftChannelFifo(&scsf)
     {
-        leftChannelFFTDataGenerator.changeOrder(FFTOrder::order2048);
+        leftChannelFFTDataGenerator.changeOrder(FFTOrder::order8192);
         monoBuffer.setSize(1, leftChannelFFTDataGenerator.getFFTSize());
     }
 
