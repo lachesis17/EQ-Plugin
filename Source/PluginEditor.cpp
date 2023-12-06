@@ -75,33 +75,61 @@ void RotaryLookAndFeel::drawToggleButton(juce::Graphics &g,
 {
     using namespace juce; // Projucer->Settings->Add "using namespace juce" to JuceHeader.h
 
-    Path powerButton;
+    if (auto *pb = dynamic_cast<PowerButton*>(&toggleButton)) // if you can cast one of the widgets to this class, do this
+    {
+        Path powerButton;
 
-    auto bounds = toggleButton.getLocalBounds();
-    //bounds.removeFromBottom(10);
-    bounds.removeFromRight(90);
-    bounds.removeFromLeft(90);
-    // g.setColour(Colours::red);
-    // g.drawRect(bounds);
-    auto size = jmin(bounds.getWidth(), bounds.getHeight()) * 0.5;//JUCE_LIVE_CONSTANT(0.5); // jmin returns smaller of 2 vals, to make square a square in non-square bbox // bypass size
-    auto r = bounds.withSizeKeepingCentre(size, size).toFloat(); // returns a rectangle! very cool
+        auto bounds = toggleButton.getLocalBounds();
+        //bounds.removeFromBottom(10);
+        bounds.removeFromRight(90);
+        bounds.removeFromLeft(90);
+        // g.setColour(Colours::red);
+        // g.drawRect(bounds);
+        auto size = jmin(bounds.getWidth(), bounds.getHeight()) * 0.5;//JUCE_LIVE_CONSTANT(0.5); // jmin returns smaller of 2 vals, to make square a square in non-square bbox // bypass size
+        auto r = bounds.withSizeKeepingCentre(size, size).toFloat(); // returns a rectangle! very cool
 
-    float ang = 30.f;
+        float ang = 25.f;
 
-    size -= 6;
+        size -= 6;
 
-    powerButton.addCentredArc(r.getCentreX(), r.getCentreY(), size * 0.5, size * 0.5, 0.f, degreesToRadians(ang), degreesToRadians(360.f - ang), true);
+        powerButton.addCentredArc(r.getCentreX(), r.getCentreY(), size * 0.5, size * 0.5, 0.f, degreesToRadians(ang), degreesToRadians(360.f - ang), true);
 
-    powerButton.startNewSubPath(r.getCentreX(), r.getY());
-    powerButton.lineTo(r.getCentre());
+        powerButton.startNewSubPath(r.getCentreX(), r.getY());
+        powerButton.lineTo(r.getCentre());
 
-    PathStrokeType pst(2.f, PathStrokeType::JointStyle::curved); // need to use this class to customise the path strokes for the analyzer
+        PathStrokeType pst(2.f, PathStrokeType::JointStyle::curved); // need to use this class to customise the path strokes for the analyzer
 
-    auto color = toggleButton.getToggleState() ? Colours::dimgrey : Colour(0u, 172u, 1u); // need to start doing this one line if else
+        auto color = toggleButton.getToggleState() ? Colours::dimgrey : Colour(0u, 172u, 1u); // need to start doing this one line if else
 
-    g.setColour(color);
-    g.strokePath(powerButton, pst);
-    g.drawEllipse(r, 2);
+        g.setColour(color);
+        g.strokePath(powerButton, pst);
+        g.drawEllipse(r, 2);
+    }
+    else if (auto *pb = dynamic_cast<AnalyzerButton*>(&toggleButton))
+    {
+        auto color = ! toggleButton.getToggleState() ? Colours::dimgrey : Colour(0u, 172u, 1u); 
+
+        g.setColour(color);
+
+        auto bounds = toggleButton.getLocalBounds();
+        g.drawRect(bounds);
+
+        auto insetRect = bounds.reduced(4); // reduced!!
+
+        Path randomPath; // cool random squiggley line
+
+        Random r;
+
+        randomPath.startNewSubPath(insetRect.getX(), insetRect.getY() + insetRect.getHeight() * r.nextFloat());
+
+        for (auto x = insetRect.getX() + 1; x < insetRect.getRight(); x += 2)
+        {
+            randomPath.lineTo(x, insetRect.getY() + insetRect.getHeight() * r.nextFloat());
+        }
+
+        g.strokePath(randomPath, PathStrokeType(1.f));
+
+    }
 }
 //==============================================================================
 void RotarySliderWithLabels::paint(juce::Graphics &g)
@@ -398,10 +426,10 @@ void ResponseCurveComponent::paint (juce::Graphics& g)
         responseCurve.lineTo(responseArea.getX() + i, map(mags[i]) );
     };
 
+    // PathStrokeType pst(2.f, PathStrokeType::JointStyle::curved);
+
     auto leftChannelFFTPath = leftPathProducer.getPath();
     leftChannelFFTPath.applyTransform(AffineTransform().translation(responseArea.getX(), responseArea.getY() - 2.5));
-
-    // PathStrokeType pst(2.f, PathStrokeType::JointStyle::curved);
     
     g.setColour(Colours::blueviolet);
     g.strokePath(leftChannelFFTPath, PathStrokeType(2.f));
@@ -718,6 +746,7 @@ EQPluginAudioProcessorEditor::EQPluginAudioProcessorEditor (EQPluginAudioProcess
     lowcutBypassButton.setLookAndFeel(&lnf);
     peakBypassButton.setLookAndFeel(&lnf);
     highcutBypassButton.setLookAndFeel(&lnf);
+    analyzerEnabledButton.setLookAndFeel(&lnf);
 
     setSize (650, 650);
     setResizable(true,true);
@@ -728,6 +757,7 @@ EQPluginAudioProcessorEditor::~EQPluginAudioProcessorEditor()
     lowcutBypassButton.setLookAndFeel(nullptr);
     peakBypassButton.setLookAndFeel(nullptr);
     highcutBypassButton.setLookAndFeel(nullptr);
+    analyzerEnabledButton.setLookAndFeel(nullptr);
 }
 
 //==============================================================================
@@ -754,6 +784,16 @@ void EQPluginAudioProcessorEditor::resized()
     // subcomponents in your editor..
 
     auto bounds = getLocalBounds();
+
+    auto analyzerEnabledArea = bounds.removeFromTop(JUCE_LIVE_CONSTANT(25));
+    analyzerEnabledArea.setWidth(100);
+    analyzerEnabledArea.setX(5);
+    analyzerEnabledArea.removeFromTop(2);
+
+    analyzerEnabledButton.setBounds(analyzerEnabledArea);
+
+    bounds.removeFromTop(5);
+
     float hRatio = 32.f / 100.f; //JUCE_LIVE_CONSTANT(33) / 100.f; // live values
     auto responseArea = bounds.removeFromTop(bounds.getHeight() * hRatio);
 
@@ -761,23 +801,24 @@ void EQPluginAudioProcessorEditor::resized()
 
     auto bypassArea = getLocalBounds();
     bypassArea.removeFromTop(bypassArea.getHeight() * hRatio);
+    bypassArea.removeFromTop(5);
 
-    bounds.removeFromTop(bounds.getHeight() * 0.08);//JUCE_LIVE_CONSTANT(0.08)));
+    bounds.removeFromTop(bounds.getHeight() * JUCE_LIVE_CONSTANT(0.08));
 
     auto bypassAreaLow = bypassArea.removeFromLeft(bypassArea.getWidth() * 0.33);
     auto bypassAreaHigh = bypassArea.removeFromRight(bypassArea.getWidth() * 0.5);
     auto lowCutArea = bounds.removeFromLeft(bounds.getWidth() * 0.33);
     auto highCutArea = bounds.removeFromRight(bounds.getWidth() * 0.5);
 
-    lowcutBypassButton.setBounds(bypassAreaLow.removeFromTop(bypassAreaLow.getHeight() * 0.08));//JUCE_LIVE_CONSTANT(0.08)));
+    lowcutBypassButton.setBounds(bypassAreaLow.removeFromTop(bypassAreaLow.getHeight() * JUCE_LIVE_CONSTANT(0.16)));
     highPassSlider.setBounds(lowCutArea.removeFromTop(lowCutArea.getHeight() * 0.5));
     lowCutSlopeSlider.setBounds(lowCutArea);
 
-    highcutBypassButton.setBounds(bypassAreaHigh.removeFromTop(bypassAreaHigh.getHeight() * 0.08));//JUCE_LIVE_CONSTANT(0.08)));
+    highcutBypassButton.setBounds(bypassAreaHigh.removeFromTop(bypassAreaHigh.getHeight() * JUCE_LIVE_CONSTANT(0.16)));
     lowPassSlider.setBounds(highCutArea.removeFromTop(highCutArea.getHeight() * 0.5));
     highCutSlopeSlider.setBounds(highCutArea);
 
-    peakBypassButton.setBounds(bypassArea.removeFromTop(bypassArea.getHeight() * 0.08));//JUCE_LIVE_CONSTANT(0.08)));
+    peakBypassButton.setBounds(bypassArea.removeFromTop(bypassArea.getHeight() * JUCE_LIVE_CONSTANT(0.16)));
     peakFreqSlider.setBounds(bounds.removeFromTop(bounds.getHeight() * 0.33));
     peakGainSlider.setBounds(bounds.removeFromTop(bounds.getHeight() * 0.5));
     peakQualitySlider.setBounds(bounds);

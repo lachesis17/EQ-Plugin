@@ -286,6 +286,8 @@ private:
 };
 
 //==============================================================================
+struct PowerButton : juce::ToggleButton {}; // init below at line 334, easiest subclass implementation of my life
+struct AnalyzerButton : juce::ToggleButton{};
 /**
 */
 class EQPluginAudioProcessorEditor  : public juce::AudioProcessorEditor
@@ -329,7 +331,8 @@ private:
     lowCutSlopeSliderAttachment,
     highCutSlopeSliderAttachment;
 
-    juce::ToggleButton lowcutBypassButton, peakBypassButton, highcutBypassButton, analyzerEnabledButton;
+    PowerButton lowcutBypassButton, peakBypassButton, highcutBypassButton;
+    AnalyzerButton analyzerEnabledButton;
 
     using ButtonAttachment = APVTS::ButtonAttachment;
     ButtonAttachment lowcutBypassButtonAttachment, peakBypassButtonAttachment, highcutBypassButtonAttachment, analyzerEnabledButtonAttachment;
