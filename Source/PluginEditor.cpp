@@ -303,11 +303,14 @@ void PathProducer::process(juce::Rectangle<float> fftBounds, double sampleRate)
 
 void ResponseCurveComponent::timerCallback()
 {
-    auto fftBounds = getAnalysisArea().toFloat();
-    auto sampleRate = audioProcessor.getSampleRate();
+    if (shouldShowFFTAnalysis)
+    {
+        auto fftBounds = getAnalysisArea().toFloat();
+        auto sampleRate = audioProcessor.getSampleRate();
 
-    leftPathProducer.process(fftBounds, sampleRate);
-    rightPathProducer.process(fftBounds, sampleRate);
+        leftPathProducer.process(fftBounds, sampleRate);
+        rightPathProducer.process(fftBounds, sampleRate);
+    }
 
     if( parametersChanged.compareAndSetBool(false, true))
     {
@@ -416,23 +419,25 @@ void ResponseCurveComponent::paint (juce::Graphics& g)
         responseCurve.lineTo(responseArea.getX() + i, map(mags[i]) );
     };
 
-    // PathStrokeType pst(2.f, PathStrokeType::JointStyle::curved);
+    if (shouldShowFFTAnalysis)
+    {
+        // PathStrokeType pst(2.f, PathStrokeType::JointStyle::curved);
+        auto leftChannelFFTPath = leftPathProducer.getPath();
+        leftChannelFFTPath.applyTransform(AffineTransform().translation(responseArea.getX(), responseArea.getY() - 2.5));
+        
+        g.setColour(Colours::blueviolet);
+        g.strokePath(leftChannelFFTPath, PathStrokeType(2.f));
+        // g.strokePath(leftChannelFFTPath, pst);
 
-    auto leftChannelFFTPath = leftPathProducer.getPath();
-    leftChannelFFTPath.applyTransform(AffineTransform().translation(responseArea.getX(), responseArea.getY() - 2.5));
+        auto rightChannelFFTPath = rightPathProducer.getPath();
+        rightChannelFFTPath.applyTransform(AffineTransform().translation(responseArea.getX(), responseArea.getY() - 2.5));
+
+        g.setColour(Colours::darkorange);
+        g.strokePath(rightChannelFFTPath, PathStrokeType(2.f));
+        // g.strokePath(rightChannelFFTPath, pst);
+        // g.fillPath(rightChannelFFTPath); // fills the spectrum line, but the Y is messed up from the response area
+    }
     
-    g.setColour(Colours::blueviolet);
-    g.strokePath(leftChannelFFTPath, PathStrokeType(2.f));
-    // g.strokePath(leftChannelFFTPath, pst);
-
-    auto rightChannelFFTPath = rightPathProducer.getPath();
-    rightChannelFFTPath.applyTransform(AffineTransform().translation(responseArea.getX(), responseArea.getY() - 2.5));
-
-    g.setColour(Colours::darkorange);
-    g.strokePath(rightChannelFFTPath, PathStrokeType(2.f));
-    // g.strokePath(rightChannelFFTPath, pst);
-    // g.fillPath(rightChannelFFTPath); // fills the spectrum line, but the Y is messed up from the response area
-
     g.setColour(Colours::purple);
     g.drawRoundedRectangle(getRenderArea().toFloat(), 4.f, 1.f);
 
@@ -771,6 +776,16 @@ EQPluginAudioProcessorEditor::EQPluginAudioProcessorEditor (EQPluginAudioProcess
 
             comp->lowPassSlider.setEnabled(!bypassed);
             comp->lowPassSlopeSlider.setEnabled(!bypassed);
+        }
+    };
+
+    analyzerEnabledButton.onClick = [safePtr]()
+    {        
+    if (auto *comp = safePtr.getComponent())
+        {
+            auto enabled = comp->analyzerEnabledButton.getToggleState();
+
+            comp->responseCurveComponent.toggleAnalysisEnablement(enabled);
         }
     };
 
