@@ -26,15 +26,15 @@ juce_add_plugin(EQ-Plugin
         NEEDS_MIDI_OUTPUT FALSE
         IS_MIDI_EFFECT FALSE
         COPY_PLUGIN_AFTER_BUILD FALSE
-        #PLUGIN_MANUFACTURER_CODE
-        #PLUGIN_CODE
+        PLUGIN_MANUFACTURER_CODE lachesis
+        PLUGIN_CODE EQ Plugin
         FORMATS ${FORMATS}
         VST3_CATEGORIES "Fx"
         #BUNDLE_ID ""
         PLUGIN_NAME "EQ Plugin"
         PRODUCT_NAME "EQ Plugin"
-        ICON_BIG "icon.png"
-        ICON_SMALL "icon.png"
+        ICON_BIG "Resources/icon.png"
+        ICON_SMALL "Resources/icon.png"
         )
 
 target_compile_features(EQ-Plugin PRIVATE cxx_std_17)
@@ -42,8 +42,8 @@ target_compile_features(EQ-Plugin PRIVATE cxx_std_17)
 juce_generate_juce_header(EQ-Plugin)
 
 juce_add_binary_data(BinaryData SOURCES
-        Orbitron.ttf
-        Monomaniac.ttf
+        Resources/Orbitron.ttf
+        Resources/Monomaniac.ttf
 )
 
 target_sources(EQ-Plugin
@@ -52,7 +52,7 @@ target_sources(EQ-Plugin
         Source/PluginProcessor.cpp
         Source/PluginEditor.h
         Source/PluginProcessor.h
-        resources.rc
+        Resources/resources.rc
         )
 
 #add_subdirectory(Sources)
