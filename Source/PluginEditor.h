@@ -334,8 +334,8 @@ private:
     peakQualitySlider,
     highPassSlider,
     lowPassSlider,
-    lowCutSlopeSlider,
-    highCutSlopeSlider;
+    highPassSlopeSlider,
+    lowPassSlopeSlider;
 
     ResponseCurveComponent responseCurveComponent;
 
@@ -348,14 +348,14 @@ private:
     peakQualitySliderAttachment,
     highPassSliderAttachment,
     lowPassSliderAttachment,
-    lowCutSlopeSliderAttachment,
-    highCutSlopeSliderAttachment;
+    highPassSlopeSliderAttachment,
+    lowPassSlopeSliderAttachment;
 
-    PowerButton lowcutBypassButton, peakBypassButton, highcutBypassButton;
+    PowerButton highpassBypassButton, peakBypassButton, lowpassBypassButton;
     AnalyzerButton analyzerEnabledButton;
 
     using ButtonAttachment = APVTS::ButtonAttachment;
-    ButtonAttachment lowcutBypassButtonAttachment, peakBypassButtonAttachment, highcutBypassButtonAttachment, analyzerEnabledButtonAttachment;
+    ButtonAttachment highpassBypassButtonAttachment, peakBypassButtonAttachment, lowpassBypassButtonAttachment, analyzerEnabledButtonAttachment;
 
     std::vector<juce::Component*> getComps();
 

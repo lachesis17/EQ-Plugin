@@ -16,12 +16,17 @@ float rotaryStartAngle, float rotaryEndAngle, juce::Slider & slider)
 
     auto bounds = Rectangle<float>(x, y, width, height);
 
-    g.setColour(Colour(63u, 11u, 74u));
-    g.setGradientFill(ColourGradient (Colour(Colours::darkorange), 0.175*(float) width, 0.175*(float) height,
-                                       Colour(63, 11, 74), 0.75*(float) width, 0.75*(float) height, true));
+    auto enabled = slider.isEnabled();
+
+    g.setGradientFill(enabled ? 
+                    ColourGradient (Colour(Colours::darkorange), 0.175*(float) width, 0.175*(float) height,
+                    Colour(63, 11, 74), 0.75*(float) width, 0.75*(float) height, true) 
+                    : 
+                    ColourGradient (Colour(Colours::lightgrey), 0.175*(float) width, 0.175*(float) height,
+                    Colour(Colours::darkgrey), 0.75*(float) width, 0.75*(float) height, true) );
     g.fillEllipse(bounds);
 
-    g.setColour(Colour(250u, 250u, 250u));
+    g.setColour(enabled ? Colour(250u, 250u, 250u) : Colour(Colours::black));
     g.drawEllipse(bounds, 1.f);    
 
     if(auto* rswl = dynamic_cast<RotarySliderWithLabels*>(&slider))
@@ -111,10 +116,9 @@ void RotaryLookAndFeel::drawToggleButton(juce::Graphics &g,
         g.setColour(color);
 
         auto bounds = toggleButton.getLocalBounds();
-        
+
         g.drawRect(bounds);
         g.strokePath(analyzerButton->randomPath, PathStrokeType(1.f));
-
     }
 }
 //==============================================================================
@@ -577,8 +581,8 @@ EQPluginAudioProcessorEditor::EQPluginAudioProcessorEditor (EQPluginAudioProcess
     peakQualitySlider(*audioProcessor.apvts.getParameter("Peak Quality"), ""), 
     highPassSlider(*audioProcessor.apvts.getParameter("LowCut Freq"), "Hz"), 
     lowPassSlider(*audioProcessor.apvts.getParameter("HighCut Freq"), "Hz"), 
-    lowCutSlopeSlider(*audioProcessor.apvts.getParameter("LowCut Slope"), "dB/Oct"), 
-    highCutSlopeSlider(*audioProcessor.apvts.getParameter("HighCut Slope"), "dB/Oct"),
+    highPassSlopeSlider(*audioProcessor.apvts.getParameter("LowCut Slope"), "dB/Oct"), 
+    lowPassSlopeSlider(*audioProcessor.apvts.getParameter("HighCut Slope"), "dB/Oct"),
 
     responseCurveComponent(audioProcessor),
     peakFreqSliderAttachment(audioProcessor.apvts, "Peak Freq", peakFreqSlider), 
@@ -586,12 +590,12 @@ EQPluginAudioProcessorEditor::EQPluginAudioProcessorEditor (EQPluginAudioProcess
     peakQualitySliderAttachment(audioProcessor.apvts, "Peak Quality", peakQualitySlider), 
     highPassSliderAttachment(audioProcessor.apvts, "LowCut Freq", highPassSlider), 
     lowPassSliderAttachment(audioProcessor.apvts, "HighCut Freq", lowPassSlider), 
-    lowCutSlopeSliderAttachment(audioProcessor.apvts, "LowCut Slope", lowCutSlopeSlider), 
-    highCutSlopeSliderAttachment(audioProcessor.apvts, "HighCut Slope", highCutSlopeSlider),
+    highPassSlopeSliderAttachment(audioProcessor.apvts, "LowCut Slope", highPassSlopeSlider), 
+    lowPassSlopeSliderAttachment(audioProcessor.apvts, "HighCut Slope", lowPassSlopeSlider),
 
-    lowcutBypassButtonAttachment(audioProcessor.apvts, "LowCut Bypassed", lowcutBypassButton),
+    highpassBypassButtonAttachment(audioProcessor.apvts, "LowCut Bypassed", highpassBypassButton),
     peakBypassButtonAttachment(audioProcessor.apvts, "Peak Bypassed", peakBypassButton),
-    highcutBypassButtonAttachment(audioProcessor.apvts, "HighCut Bypassed", highcutBypassButton),
+    lowpassBypassButtonAttachment(audioProcessor.apvts, "HighCut Bypassed", lowpassBypassButton),
     analyzerEnabledButtonAttachment(audioProcessor.apvts, "Analyzer Enabled", analyzerEnabledButton)
 
 {
@@ -624,11 +628,11 @@ EQPluginAudioProcessorEditor::EQPluginAudioProcessorEditor (EQPluginAudioProcess
 
     // addAndMakeVisible (lowcutComboLabel);
     // lowcutComboLabel.setText ("Low Slope", juce::dontSendNotification);
-    // lowcutComboLabel.attachToComponent (&lowCutSlopeSlider, false);
+    // lowcutComboLabel.attachToComponent (&highPassSlopeSlider, false);
 
     // addAndMakeVisible (highcutComboLabel);
     // highcutComboLabel.setText ("High Slope", juce::dontSendNotification);
-    // highcutComboLabel.attachToComponent (&highCutSlopeSlider, false);
+    // highcutComboLabel.attachToComponent (&lowPassSlopeSlider, false);
 
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
@@ -695,11 +699,11 @@ EQPluginAudioProcessorEditor::EQPluginAudioProcessorEditor (EQPluginAudioProcess
     lowPassSlider.labels.add({0.f, "20Hz"});
     lowPassSlider.labels.add({1.f, "20kHz"});
 
-    lowCutSlopeSlider.labels.add({0.f, "12"});
-    lowCutSlopeSlider.labels.add({1.f, "48"});
+    highPassSlopeSlider.labels.add({0.f, "12"});
+    highPassSlopeSlider.labels.add({1.f, "48"});
     
-    highCutSlopeSlider.labels.add({0.f, "12"});
-    highCutSlopeSlider.labels.add({1.f, "48"});
+    lowPassSlopeSlider.labels.add({0.f, "12"});
+    lowPassSlopeSlider.labels.add({1.f, "48"});
 
     for( auto* comp: getComps())
     {
@@ -729,10 +733,46 @@ EQPluginAudioProcessorEditor::EQPluginAudioProcessorEditor (EQPluginAudioProcess
     // highcutComboLabel.attachToComponent (&highcutCombo, true);
     // highcutComboAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment>(audioProcessor.apvts, "HighCut Slope", highcutCombo);
 
-    lowcutBypassButton.setLookAndFeel(&lnf);
+    highpassBypassButton.setLookAndFeel(&lnf);
     peakBypassButton.setLookAndFeel(&lnf);
-    highcutBypassButton.setLookAndFeel(&lnf);
+    lowpassBypassButton.setLookAndFeel(&lnf);
     analyzerEnabledButton.setLookAndFeel(&lnf);
+
+    // for async callbacks need to use a safe pointer to make sure the class (edtior) still exists to use the lambda
+    auto safePtr = juce::Component::SafePointer<EQPluginAudioProcessorEditor>(this);
+    peakBypassButton.onClick = [safePtr]()
+    {
+        if (auto *comp = safePtr.getComponent())
+        {
+            auto bypassed = comp->peakBypassButton.getToggleState();
+            
+            comp->peakFreqSlider.setEnabled(!bypassed);
+            comp->peakGainSlider.setEnabled(!bypassed);
+            comp->peakQualitySlider.setEnabled(!bypassed);
+        }
+    };
+
+    highpassBypassButton.onClick = [safePtr]()
+    {
+        if (auto *comp = safePtr.getComponent())
+        {
+            auto bypassed = comp->highpassBypassButton.getToggleState();
+
+            comp->highPassSlider.setEnabled(!bypassed);
+            comp->highPassSlopeSlider.setEnabled(!bypassed);
+        }
+    };
+
+    lowpassBypassButton.onClick = [safePtr]()
+    {
+        if (auto *comp = safePtr.getComponent())
+        {
+            auto bypassed = comp->lowpassBypassButton.getToggleState();
+
+            comp->lowPassSlider.setEnabled(!bypassed);
+            comp->lowPassSlopeSlider.setEnabled(!bypassed);
+        }
+    };
 
     setSize (650, 650);
     setResizable(true,true);
@@ -740,9 +780,9 @@ EQPluginAudioProcessorEditor::EQPluginAudioProcessorEditor (EQPluginAudioProcess
 
 EQPluginAudioProcessorEditor::~EQPluginAudioProcessorEditor()
 {
-    lowcutBypassButton.setLookAndFeel(nullptr);
+    highpassBypassButton.setLookAndFeel(nullptr);
     peakBypassButton.setLookAndFeel(nullptr);
-    highcutBypassButton.setLookAndFeel(nullptr);
+    lowpassBypassButton.setLookAndFeel(nullptr);
     analyzerEnabledButton.setLookAndFeel(nullptr);
 }
 
@@ -796,13 +836,13 @@ void EQPluginAudioProcessorEditor::resized()
     auto lowCutArea = bounds.removeFromLeft(bounds.getWidth() * 0.33);
     auto highCutArea = bounds.removeFromRight(bounds.getWidth() * 0.5);
 
-    lowcutBypassButton.setBounds(bypassAreaLow.removeFromTop(bypassAreaLow.getHeight() * JUCE_LIVE_CONSTANT(0.16)));
+    highpassBypassButton.setBounds(bypassAreaLow.removeFromTop(bypassAreaLow.getHeight() * JUCE_LIVE_CONSTANT(0.16)));
     highPassSlider.setBounds(lowCutArea.removeFromTop(lowCutArea.getHeight() * 0.5));
-    lowCutSlopeSlider.setBounds(lowCutArea);
+    highPassSlopeSlider.setBounds(lowCutArea);
 
-    highcutBypassButton.setBounds(bypassAreaHigh.removeFromTop(bypassAreaHigh.getHeight() * JUCE_LIVE_CONSTANT(0.16)));
+    lowpassBypassButton.setBounds(bypassAreaHigh.removeFromTop(bypassAreaHigh.getHeight() * JUCE_LIVE_CONSTANT(0.16)));
     lowPassSlider.setBounds(highCutArea.removeFromTop(highCutArea.getHeight() * 0.5));
-    highCutSlopeSlider.setBounds(highCutArea);
+    lowPassSlopeSlider.setBounds(highCutArea);
 
     peakBypassButton.setBounds(bypassArea.removeFromTop(bypassArea.getHeight() * JUCE_LIVE_CONSTANT(0.16)));
     peakFreqSlider.setBounds(bounds.removeFromTop(bounds.getHeight() * 0.33));
@@ -829,13 +869,13 @@ std::vector<juce::Component*> EQPluginAudioProcessorEditor::getComps()
         &peakQualitySlider,
         &highPassSlider,
         &lowPassSlider,
-        &lowCutSlopeSlider,
-        &highCutSlopeSlider,
+        &highPassSlopeSlider,
+        &lowPassSlopeSlider,
         &responseCurveComponent,
 
-        &lowcutBypassButton, 
+        &highpassBypassButton, 
         &peakBypassButton,
-        &highcutBypassButton,
+        &lowpassBypassButton,
         &analyzerEnabledButton
     };
 }
