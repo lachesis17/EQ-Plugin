@@ -105,29 +105,15 @@ void RotaryLookAndFeel::drawToggleButton(juce::Graphics &g,
         g.strokePath(powerButton, pst);
         g.drawEllipse(r, 2);
     }
-    else if (auto *pb = dynamic_cast<AnalyzerButton*>(&toggleButton))
+    else if (auto *analyzerButton = dynamic_cast<AnalyzerButton*>(&toggleButton))
     {
         auto color = ! toggleButton.getToggleState() ? Colours::dimgrey : Colour(0u, 172u, 1u); 
-
         g.setColour(color);
 
         auto bounds = toggleButton.getLocalBounds();
+        
         g.drawRect(bounds);
-
-        auto insetRect = bounds.reduced(4); // reduced!!
-
-        Path randomPath; // cool random squiggley line
-
-        Random r;
-
-        randomPath.startNewSubPath(insetRect.getX(), insetRect.getY() + insetRect.getHeight() * r.nextFloat());
-
-        for (auto x = insetRect.getX() + 1; x < insetRect.getRight(); x += 2)
-        {
-            randomPath.lineTo(x, insetRect.getY() + insetRect.getHeight() * r.nextFloat());
-        }
-
-        g.strokePath(randomPath, PathStrokeType(1.f));
+        g.strokePath(analyzerButton->randomPath, PathStrokeType(1.f));
 
     }
 }
