@@ -56,12 +56,12 @@ float rotaryStartAngle, float rotaryEndAngle, juce::Slider & slider)
         r.setSize(strWidth + 22, rswl->getTextHeight() + 10);
         r.setCentre(center);
 
-        g.setColour(Colours::black);
+        g.setColour(enabled ? Colours::black : Colours::white);
         g.drawRoundedRectangle(r, 12,1);
         g.fillRoundedRectangle(r, 12);
         //g.fillRect(r);
 
-        g.setColour(Colours::white);
+        g.setColour(enabled ? Colours::white : Colours::black);
         //g.setFont(Font("Tahoma", 17, 0)); // a few different ways to change font, but instead change for all labels in the lookandfeel class in header
         // juce::Font roboto_font = juce::Typeface::createSystemTypefaceFor(BinaryData::RobotoRegular_ttf, BinaryData::RobotoRegular_ttfSize);
         // g.setFont(Font(roboto_font.getTypefaceName(), 15, 1));
