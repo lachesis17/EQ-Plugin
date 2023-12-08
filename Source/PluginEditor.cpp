@@ -790,7 +790,11 @@ EQPluginAudioProcessorEditor::EQPluginAudioProcessorEditor (EQPluginAudioProcess
     };
 
     setSize (650, 650);
-    setResizable(true,true);
+    setResizable(true,false);
+    juce::Rectangle<int> r = Desktop::getInstance().getDisplays().getMainDisplay().userArea;
+    int x = r.getWidth();
+    int y = r.getHeight();
+    setResizeLimits(50, 0, x, y);
 }
 
 EQPluginAudioProcessorEditor::~EQPluginAudioProcessorEditor()
@@ -880,7 +884,7 @@ void EQPluginAudioProcessorEditor::resized()
     auto bounds = getLocalBounds();
 
     auto analyzerEnabledArea = bounds.removeFromTop(25);
-    analyzerEnabledArea.setWidth(100);
+    analyzerEnabledArea.setWidth(bounds.getWidth() * 0.133);
     analyzerEnabledArea.setX(5);
     analyzerEnabledArea.removeFromTop(2);
 
