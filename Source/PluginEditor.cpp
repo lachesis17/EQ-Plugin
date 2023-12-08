@@ -85,17 +85,17 @@ void RotaryLookAndFeel::drawToggleButton(juce::Graphics &g,
         Path powerButton;
 
         auto bounds = toggleButton.getLocalBounds();
-        //bounds.removeFromBottom(10);
-        bounds.removeFromRight(90);
-        bounds.removeFromLeft(90);
         // g.setColour(Colours::red);
         // g.drawRect(bounds);
-        auto size = jmin(bounds.getWidth(), bounds.getHeight()) * 0.5;//JUCE_LIVE_CONSTANT(0.5); // jmin returns smaller of 2 vals, to make square a square in non-square bbox // bypass size
+        
+        bool scale = bounds.getWidth() > bounds.getHeight();
+        auto size = scale ?  bounds.getHeight() * 0.5 : bounds.getHeight() * 0.75;
+        //auto size = jmin(bounds.getWidth(), bounds.getHeight()) * 0.5;//JUCE_LIVE_CONSTANT(0.5); // jmin returns smaller of 2 vals, to make square a square in non-square bbox // bypass size
         auto r = bounds.withSizeKeepingCentre(size, size).toFloat(); // returns a rectangle! very cool
 
         float ang = 25.f;
 
-        size -= 6;
+        size -= 7;
 
         powerButton.addCentredArc(r.getCentreX(), r.getCentreY(), size * 0.5, size * 0.5, 0.f, degreesToRadians(ang), degreesToRadians(360.f - ang), true);
 
@@ -817,6 +817,59 @@ void EQPluginAudioProcessorEditor::paint (juce::Graphics& g)
     g.setGradientFill(ColourGradient (Colour(23, 0, 62), 0.125*(float) getWidth(), 0.125*(float) getHeight(),
                                        Colour(0, 0, 0), 0.875*(float) getWidth(), 0.875*(float) getHeight(), true));
     g.fillAll();
+
+    Path curve;
+    
+    auto bounds = getLocalBounds();
+    auto center = bounds.getCentre();
+    
+    const juce::Typeface::Ptr typeface = juce::Typeface::createSystemTypefaceFor(BinaryData::Orbitron_ttf, BinaryData::Orbitron_ttfSize);
+    g.setFont(juce::Font(typeface).withHeight(35.0f)); // slider labels
+    
+    String title { "E Q - P L U G I N" };
+    g.setFont(30);
+    auto titleWidth = g.getCurrentFont().getStringWidth(title);
+
+    curve.startNewSubPath(center.x, 32);
+    curve.lineTo(center.x - titleWidth * 0.45f, 32);
+    
+    auto cornerSize = 20;
+    auto curvePos = curve.getCurrentPosition();
+    curve.quadraticTo(curvePos.getX() - cornerSize, curvePos.getY(),
+                      curvePos.getX() - cornerSize, curvePos.getY() - 16);
+    curvePos = curve.getCurrentPosition();
+    curve.quadraticTo(curvePos.getX(), 2,
+                      curvePos.getX() - cornerSize, 2);
+    
+    curve.lineTo({0.f, 2.f});
+    curve.lineTo(-6, 0.f);
+    curve.lineTo(center.x, 0.f);
+    curve.closeSubPath();
+
+    g.setGradientFill(ColourGradient (Colour(Colours::darkorange), 1.5*(float) titleWidth, 10*(float) 5,
+                                        Colour(63, 11, 74), 2*(float) titleWidth, 5, true));
+    g.fillPath(curve);
+    
+    curve.applyTransform(AffineTransform().scaled(-1, 1));
+    //curve.applyTransform(AffineTransform().translated(getWidth()-2, 0));
+    curve.applyTransform(AffineTransform().translated(getWidth()-2, 0));
+    g.fillPath(curve);
+    
+    
+    //g.setColour(Colour(255u, 154u, 1u)); // orange
+    g.setColour(Colour(200u, 200u, 200u));
+    g.drawFittedText(title, bounds, juce::Justification::centredTop, 1);
+    
+    g.setColour(Colour(175u, 175u, 175u));
+    g.setFont(14);
+    g.drawFittedText("High Pass", highPassSlopeSlider.getBounds().reduced(5), juce::Justification::centredBottom, 1);
+    g.drawFittedText("Peak", peakQualitySlider.getBounds().reduced(5), juce::Justification::centredBottom, 1);
+    g.drawFittedText("Low Pass", lowPassSlopeSlider.getBounds().reduced(5), juce::Justification::centredBottom, 1);
+    
+    // auto buildDate = Time::getCompilationDate().toString(true, false);
+    // auto buildTime = Time::getCompilationDate().toString(false, true);
+    g.setFont(12);
+    g.drawFittedText("github.com/lachesis17", lowPassSlopeSlider.getBounds().reduced(10).withY(7), Justification::topRight, 2);
 }
 
 void EQPluginAudioProcessorEditor::resized()
@@ -826,7 +879,7 @@ void EQPluginAudioProcessorEditor::resized()
 
     auto bounds = getLocalBounds();
 
-    auto analyzerEnabledArea = bounds.removeFromTop(JUCE_LIVE_CONSTANT(25));
+    auto analyzerEnabledArea = bounds.removeFromTop(25);
     analyzerEnabledArea.setWidth(100);
     analyzerEnabledArea.setX(5);
     analyzerEnabledArea.removeFromTop(2);
@@ -835,31 +888,31 @@ void EQPluginAudioProcessorEditor::resized()
 
     bounds.removeFromTop(5);
 
-    float hRatio = 32.f / 100.f; //JUCE_LIVE_CONSTANT(33) / 100.f; // live values
+    float hRatio = 25.f / 100.f; //JUCE_LIVE_CONSTANT(33) / 100.f; // live values
     auto responseArea = bounds.removeFromTop(bounds.getHeight() * hRatio);
 
     responseCurveComponent.setBounds(responseArea);
 
-    auto bypassArea = getLocalBounds();
-    bypassArea.removeFromTop(bypassArea.getHeight() * hRatio);
-    bypassArea.removeFromTop(5);
+    // auto bypassArea = getLocalBounds();
+    // bypassArea.removeFromTop(bypassArea.getHeight() * hRatio);
+    // bypassArea.removeFromTop(5);
 
-    bounds.removeFromTop(bounds.getHeight() * JUCE_LIVE_CONSTANT(0.08));
+    bounds.removeFromTop(5);
 
-    auto bypassAreaLow = bypassArea.removeFromLeft(bypassArea.getWidth() * 0.33);
-    auto bypassAreaHigh = bypassArea.removeFromRight(bypassArea.getWidth() * 0.5);
+    // auto bypassAreaLow = bypassArea.removeFromLeft(bypassArea.getWidth() * 0.33);
+    // auto bypassAreaHigh = bypassArea.removeFromRight(bypassArea.getWidth() * 0.5);
     auto lowCutArea = bounds.removeFromLeft(bounds.getWidth() * 0.33);
     auto highCutArea = bounds.removeFromRight(bounds.getWidth() * 0.5);
 
-    highpassBypassButton.setBounds(bypassAreaLow.removeFromTop(bypassAreaLow.getHeight() * JUCE_LIVE_CONSTANT(0.16)));
+    highpassBypassButton.setBounds(lowCutArea.removeFromTop(25));
     highPassSlider.setBounds(lowCutArea.removeFromTop(lowCutArea.getHeight() * 0.5));
     highPassSlopeSlider.setBounds(lowCutArea);
 
-    lowpassBypassButton.setBounds(bypassAreaHigh.removeFromTop(bypassAreaHigh.getHeight() * JUCE_LIVE_CONSTANT(0.16)));
+    lowpassBypassButton.setBounds(highCutArea.removeFromTop(25));
     lowPassSlider.setBounds(highCutArea.removeFromTop(highCutArea.getHeight() * 0.5));
     lowPassSlopeSlider.setBounds(highCutArea);
 
-    peakBypassButton.setBounds(bypassArea.removeFromTop(bypassArea.getHeight() * JUCE_LIVE_CONSTANT(0.16)));
+    peakBypassButton.setBounds(bounds.removeFromTop(25));
     peakFreqSlider.setBounds(bounds.removeFromTop(bounds.getHeight() * 0.33));
     peakGainSlider.setBounds(bounds.removeFromTop(bounds.getHeight() * 0.5));
     peakQualitySlider.setBounds(bounds);
@@ -870,8 +923,8 @@ void EQPluginAudioProcessorEditor::resized()
     // peakGainSlider.setBounds(getWidth() / 2 - 200, getHeight() / 2 - 25, 500, 75);
     // peakQualitySlider.setBounds(getWidth() / 2 - 200, getHeight() / 2 + 50, 500, 75);
 
-    lowcutCombo.setBounds(getWidth() / 2 - 200, getHeight() / 2 + 150, 400, 25);
-    highcutCombo.setBounds(getWidth() / 2 - 200, getHeight() / 2 + 200, 400, 25);
+    // lowcutCombo.setBounds(getWidth() / 2 - 200, getHeight() / 2 + 150, 400, 25);
+    // highcutCombo.setBounds(getWidth() / 2 - 200, getHeight() / 2 + 200, 400, 25);
 
 }
 
