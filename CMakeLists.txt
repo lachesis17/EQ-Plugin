@@ -60,7 +60,8 @@ target_sources(EQ-Plugin
 target_compile_definitions(EQ-Plugin PUBLIC
         JUCE_VST3_CAN_REPLACE_VST2=0
         JUCE_WEB_BROWSER=0
-        JUCE_USE_CURL=0)
+        JUCE_USE_CURL=0
+        JUCE_DISPLAY_SPLASH_SCREEN=0) # very naughty
 
 target_link_libraries(EQ-Plugin
         PRIVATE

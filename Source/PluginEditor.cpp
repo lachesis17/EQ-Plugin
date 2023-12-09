@@ -892,7 +892,7 @@ void EQPluginAudioProcessorEditor::resized()
 
     bounds.removeFromTop(5);
 
-    float hRatio = 25.f / 100.f; //JUCE_LIVE_CONSTANT(33) / 100.f; // live values
+    float hRatio = 33.f / 100.f; //JUCE_LIVE_CONSTANT(33) / 100.f; // live values
     auto responseArea = bounds.removeFromTop(bounds.getHeight() * hRatio);
 
     responseCurveComponent.setBounds(responseArea);
